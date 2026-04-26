@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Ourcade",
+    "slug": "ourcade",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "scheme": "ourcade",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ourcade.app"
+    },
+    "android": {
+      "package": "com.ourcade.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
