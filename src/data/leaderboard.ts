@@ -58,14 +58,76 @@ const MOCK_SCORES: Score[] = [
   { id: '60', initials: 'NUB', gameId: 'minesweep', score: 20000 - 167,  unit: 'LV', level: 2, taps: 167,  date: '2026-04-25' },
   { id: '61', initials: 'AGE', gameId: 'minesweep', score: 10000 - 38,   unit: 'LV', level: 1, taps: 38,   date: '2026-04-19' },
 
-  // GHOST — mission 1 only for now. Score = baseScore - timeMs/100 + unspent_budget*500.
-  { id: '70', initials: 'KAT', gameId: 'ghost', score: 18420, unit: 'PTS', date: '2026-04-26' },
-  { id: '71', initials: 'NOX', gameId: 'ghost', score: 16980, unit: 'PTS', date: '2026-04-25' },
-  { id: '72', initials: 'ZEN', gameId: 'ghost', score: 14210, unit: 'PTS', date: '2026-04-24' },
-  { id: '73', initials: 'DOM', gameId: 'ghost', score: 12450, unit: 'PTS', date: '2026-04-26' },
-  { id: '74', initials: 'BLZ', gameId: 'ghost', score: 11020, unit: 'PTS', date: '2026-04-23' },
-  { id: '75', initials: 'STN', gameId: 'ghost', score: 9530,  unit: 'PTS', date: '2026-04-22' },
-  { id: '76', initials: 'AAA', gameId: 'ghost', score: 7820,  unit: 'PTS', date: '2026-04-21' },
+  // Polaroid — 5 rounds × max 2000 = 10,000 ceiling.
+  { id: '90', initials: 'KAT', gameId: 'polaroid', score: 9420, unit: 'PTS', date: '2026-04-26' },
+  { id: '91', initials: 'NOX', gameId: 'polaroid', score: 8870, unit: 'PTS', date: '2026-04-25' },
+  { id: '92', initials: 'ZIP', gameId: 'polaroid', score: 8210, unit: 'PTS', date: '2026-04-24' },
+  { id: '93', initials: 'DOM', gameId: 'polaroid', score: 7340, unit: 'PTS', date: '2026-04-26' },
+  { id: '94', initials: 'BLZ', gameId: 'polaroid', score: 6920, unit: 'PTS', date: '2026-04-23' },
+  { id: '95', initials: 'ZEN', gameId: 'polaroid', score: 6180, unit: 'PTS', date: '2026-04-22' },
+  { id: '96', initials: 'AAA', gameId: 'polaroid', score: 5440, unit: 'PTS', date: '2026-04-21' },
+  { id: '97', initials: 'NUB', gameId: 'polaroid', score: 3820, unit: 'PTS', date: '2026-04-20' },
+
+  // Trivia — 10 questions × max 1000 = 10,000 ceiling.
+  { id: '140', initials: 'KAT', gameId: 'trivia', score: 9420, unit: 'PTS', date: '2026-04-26' },
+  { id: '141', initials: 'NOX', gameId: 'trivia', score: 8870, unit: 'PTS', date: '2026-04-25' },
+  { id: '142', initials: 'ZIP', gameId: 'trivia', score: 7980, unit: 'PTS', date: '2026-04-24' },
+  { id: '143', initials: 'DOM', gameId: 'trivia', score: 6720, unit: 'PTS', date: '2026-04-26' },
+  { id: '144', initials: 'BLZ', gameId: 'trivia', score: 5340, unit: 'PTS', date: '2026-04-23' },
+  { id: '145', initials: 'AAA', gameId: 'trivia', score: 3200, unit: 'PTS', date: '2026-04-21' },
+
+  // Draw It — 5 rounds × max 1000 = 5,000 ceiling.
+  { id: '150', initials: 'KAT', gameId: 'draw-it', score: 4620, unit: 'PTS', date: '2026-04-26' },
+  { id: '151', initials: 'ZIP', gameId: 'draw-it', score: 4180, unit: 'PTS', date: '2026-04-25' },
+  { id: '152', initials: 'DOM', gameId: 'draw-it', score: 3540, unit: 'PTS', date: '2026-04-26' },
+  { id: '153', initials: 'BLZ', gameId: 'draw-it', score: 2820, unit: 'PTS', date: '2026-04-23' },
+  { id: '154', initials: 'AAA', gameId: 'draw-it', score: 1750, unit: 'PTS', date: '2026-04-21' },
+
+  // Pulse — endless distance × multiplier; elite players push 30k+.
+  { id: '160', initials: 'KAT', gameId: 'pulse', score: 32140, unit: 'PTS', date: '2026-04-26' },
+  { id: '161', initials: 'NOX', gameId: 'pulse', score: 24690, unit: 'PTS', date: '2026-04-25' },
+  { id: '162', initials: 'ZIP', gameId: 'pulse', score: 18420, unit: 'PTS', date: '2026-04-24' },
+  { id: '163', initials: 'DOM', gameId: 'pulse', score: 12380, unit: 'PTS', date: '2026-04-26' },
+  { id: '164', initials: 'BLZ', gameId: 'pulse', score: 7140,  unit: 'PTS', date: '2026-04-23' },
+  { id: '165', initials: 'AAA', gameId: 'pulse', score: 3220,  unit: 'PTS', date: '2026-04-21' },
+
+  // Dead Air — score is centiseconds (0.01s units). 6,000 = 60s, 12,000 = 2min.
+  { id: '130', initials: 'ZEN', gameId: 'dead-air', score: 12420, unit: 'SEC', date: '2026-04-26' },
+  { id: '131', initials: 'KAT', gameId: 'dead-air', score: 8970,  unit: 'SEC', date: '2026-04-25' },
+  { id: '132', initials: 'NOX', gameId: 'dead-air', score: 6340,  unit: 'SEC', date: '2026-04-24' },
+  { id: '133', initials: 'DOM', gameId: 'dead-air', score: 4520,  unit: 'SEC', date: '2026-04-26' },
+  { id: '134', initials: 'BLZ', gameId: 'dead-air', score: 3080,  unit: 'SEC', date: '2026-04-23' },
+  { id: '135', initials: 'AAA', gameId: 'dead-air', score: 1840,  unit: 'SEC', date: '2026-04-21' },
+
+  // Walk the Line — sum of per-level scores, max ~20000.
+  { id: '110', initials: 'KAT', gameId: 'walk-the-line', score: 16240, unit: 'PTS', date: '2026-04-26' },
+  { id: '111', initials: 'NOX', gameId: 'walk-the-line', score: 14880, unit: 'PTS', date: '2026-04-25' },
+  { id: '112', initials: 'ZIP', gameId: 'walk-the-line', score: 13420, unit: 'PTS', date: '2026-04-24' },
+  { id: '113', initials: 'DOM', gameId: 'walk-the-line', score: 11200, unit: 'PTS', date: '2026-04-26' },
+  { id: '114', initials: 'BLZ', gameId: 'walk-the-line', score: 9870,  unit: 'PTS', date: '2026-04-23' },
+  { id: '115', initials: 'AAA', gameId: 'walk-the-line', score: 7260,  unit: 'PTS', date: '2026-04-21' },
+
+  // Slipstream — endless distance × multiplier; elite players push 50k+.
+  { id: '120', initials: 'KAT', gameId: 'slipstream', score: 64280, unit: 'PTS', date: '2026-04-26' },
+  { id: '121', initials: 'NOX', gameId: 'slipstream', score: 51760, unit: 'PTS', date: '2026-04-25' },
+  { id: '122', initials: 'ZIP', gameId: 'slipstream', score: 42910, unit: 'PTS', date: '2026-04-24' },
+  { id: '123', initials: 'DOM', gameId: 'slipstream', score: 32540, unit: 'PTS', date: '2026-04-26' },
+  { id: '124', initials: 'BLZ', gameId: 'slipstream', score: 26380, unit: 'PTS', date: '2026-04-23' },
+  { id: '125', initials: 'ZEN', gameId: 'slipstream', score: 19720, unit: 'PTS', date: '2026-04-22' },
+  { id: '126', initials: 'AAA', gameId: 'slipstream', score: 12440, unit: 'PTS', date: '2026-04-21' },
+  { id: '127', initials: 'NUB', gameId: 'slipstream', score: 5980,  unit: 'PTS', date: '2026-04-20' },
+
+  // Tilt Maze — composite: level * 1_000_000 - elapsed_ms (higher better).
+  { id: '80', initials: 'KAT', gameId: 'tilt-maze', score: 10_000_000 - 218_400, unit: 'LV', level: 10, taps: 218_400, date: '2026-04-26' },
+  { id: '81', initials: 'NOX', gameId: 'tilt-maze', score: 9_000_000  - 195_100, unit: 'LV', level: 9,  taps: 195_100, date: '2026-04-25' },
+  { id: '82', initials: 'ZIP', gameId: 'tilt-maze', score: 8_000_000  - 167_900, unit: 'LV', level: 8,  taps: 167_900, date: '2026-04-25' },
+  { id: '83', initials: 'DOM', gameId: 'tilt-maze', score: 7_000_000  - 142_300, unit: 'LV', level: 7,  taps: 142_300, date: '2026-04-26' },
+  { id: '84', initials: 'BLZ', gameId: 'tilt-maze', score: 6_000_000  - 128_700, unit: 'LV', level: 6,  taps: 128_700, date: '2026-04-23' },
+  { id: '85', initials: 'STN', gameId: 'tilt-maze', score: 5_000_000  - 96_400,  unit: 'LV', level: 5,  taps: 96_400,  date: '2026-04-22' },
+  { id: '86', initials: 'AAA', gameId: 'tilt-maze', score: 4_000_000  - 78_200,  unit: 'LV', level: 4,  taps: 78_200,  date: '2026-04-21' },
+  { id: '87', initials: 'BOT', gameId: 'tilt-maze', score: 3_000_000  - 51_900,  unit: 'LV', level: 3,  taps: 51_900,  date: '2026-04-20' },
+  { id: '88', initials: 'TUR', gameId: 'tilt-maze', score: 2_000_000  - 33_500,  unit: 'LV', level: 2,  taps: 33_500,  date: '2026-04-26' },
+  { id: '89', initials: 'NUB', gameId: 'tilt-maze', score: 1_000_000  - 18_600,  unit: 'LV', level: 1,  taps: 18_600,  date: '2026-04-19' },
 
   // Reaction Light — lower is better
   { id: '101', initials: 'ZIP', gameId: 'reaction-light', score: 142, unit: 'MS', date: '2026-04-26' },
@@ -122,6 +184,22 @@ export function getPlayerBest(gameId: string): Score | null {
   if (!ours.length) return null;
   ours.sort(scoreSorter(gameId));
   return ours[0];
+}
+
+/**
+ * Returns the player's leaderboard placement for a game: their best entry
+ * plus its rank among everyone else's scores. Used by the lobby's cabinet
+ * cards to lead with "RANK #X" instead of a raw score.
+ */
+export function getPlayerRank(
+  gameId: string,
+): { rank: number; total: number; best: Score } | null {
+  const best = getPlayerBest(gameId);
+  if (!best) return null;
+  const all = getAllScoresForGame(gameId);
+  const sorted = [...all].sort(scoreSorter(gameId));
+  const rank = sorted.findIndex((s) => s.id === best.id) + 1;
+  return { rank, total: sorted.length, best };
 }
 
 /**

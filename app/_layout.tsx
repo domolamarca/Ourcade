@@ -16,6 +16,7 @@ import {
   VT323_400Regular,
 } from '@expo-google-fonts/vt323';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { colors } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -37,7 +38,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -58,11 +59,43 @@ export default function RootLayout() {
           options={{ presentation: 'card', gestureEnabled: false }}
         />
         <Stack.Screen
-          name="play/ghost"
+          name="play/tilt-maze"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/polaroid"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/walk-the-line"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/slipstream"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/dead-air"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/trivia"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/draw-it"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/pulse"
           options={{ presentation: 'card', gestureEnabled: false }}
         />
         <Stack.Screen name="result/[id]" options={{ presentation: 'card' }} />
+        <Stack.Screen
+          name="shop"
+          options={{ presentation: 'modal', gestureEnabled: true }}
+        />
       </Stack>
-    </>
+    </SafeAreaProvider>
   );
 }

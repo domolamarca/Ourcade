@@ -1,9 +1,11 @@
 // Player card. Stats + sensor permission status. Initials editable here so
 // users don't have to wait for a high score to set them.
 
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../../src/components/ArcadeText';
+import { Blink } from '../../src/components/Blink';
 import { InitialsEntry } from '../../src/components/InitialsEntry';
 import { NeonFrame } from '../../src/components/NeonFrame';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
@@ -61,10 +63,38 @@ export default function ProfileScreen() {
             marginTop: spacing.xl,
           }}
         >
-          <Stat label="CREDITS" value={String(player.coins)} color={neon('yellow')} />
+          <Stat label="TOKENS" value={String(player.tokens)} color={neon('yellow')} />
           <Stat label="PLAYS" value={String(player.totalPlays)} color={neon('magenta')} />
           <Stat label="#1 WINS" value={String(player.highScores)} color={neon('green')} />
         </View>
+
+        {/* Get more tokens — quick link to shop */}
+        <Pressable onPress={() => router.push('/shop')} style={{ marginTop: spacing.md }}>
+          <NeonFrame color={neon('yellow')} thickness={2} padding={spacing.md} glow>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <View>
+                <ArcadeText variant="pixel" size={9} color={neon('yellow')} glowColor={neon('yellow')}>
+                  {'NEED MORE TOKENS?'}
+                </ArcadeText>
+                <View style={{ height: 4 }} />
+                {player.pendingFreeTokens() > 0 ? (
+                  <Blink intervalMs={500} minOpacity={0.5}>
+                    <ArcadeText variant="mono" size={14} color={neon('green')} glowColor={neon('green')}>
+                      {`+${player.pendingFreeTokens()} FREE READY`}
+                    </ArcadeText>
+                  </Blink>
+                ) : (
+                  <ArcadeText variant="mono" size={14} color={colors.textDim}>
+                    {'BROWSE PACKS'}
+                  </ArcadeText>
+                )}
+              </View>
+              <ArcadeText variant="pixel" size={20} color={neon('yellow')}>
+                {'>>'}
+              </ArcadeText>
+            </View>
+          </NeonFrame>
+        </Pressable>
 
         {/* Sensor status */}
         <View style={{ marginTop: spacing.xl }}>

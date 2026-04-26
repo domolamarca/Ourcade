@@ -104,23 +104,101 @@ function renderShape(id: string, color: string) {
           <Circle cx="22" cy="22" r="8" fill={color} fillOpacity={0.85} />
         </>
       );
-    case 'ghost':
-      // Hooded silhouette with a single visible eye — handler-watching-runner vibe.
+    case 'trivia':
+      // Question mark inside a card / speech bubble.
       return (
         <>
-          {/* Hood */}
+          <Rect x="4" y="6" width="24" height="22" stroke={color} strokeWidth="2" fill="none" />
+          <Path d="M 12 13 Q 12 9 16 9 T 20 13 Q 20 16 16 17 L 16 19" stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" />
+          <Circle cx="16" cy="23" r="1.4" fill={color} />
+        </>
+      );
+    case 'draw-it':
+      // Pencil drawing a curve.
+      return (
+        <>
+          <Path d="M 5 22 Q 12 8 19 12 T 27 8" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <Path d="M 22 6 L 27 11 L 25 13 L 20 8 Z" fill={color} />
+        </>
+      );
+    case 'pulse':
+      // Four falling tiles in lanes.
+      return (
+        <>
+          <Line x1="6" y1="3" x2="6" y2="29" stroke={color} strokeOpacity="0.4" strokeWidth="0.8" />
+          <Line x1="13" y1="3" x2="13" y2="29" stroke={color} strokeOpacity="0.4" strokeWidth="0.8" />
+          <Line x1="20" y1="3" x2="20" y2="29" stroke={color} strokeOpacity="0.4" strokeWidth="0.8" />
+          <Line x1="27" y1="3" x2="27" y2="29" stroke={color} strokeOpacity="0.4" strokeWidth="0.8" />
+          <Rect x="3" y="9" width="6" height="3" fill={color} />
+          <Rect x="17" y="14" width="6" height="3" fill={color} />
+          <Rect x="10" y="19" width="6" height="3" fill={color} />
+          <Rect x="24" y="22" width="6" height="3" fill={color} />
+          {/* Hit line */}
+          <Line x1="2" y1="27" x2="30" y2="27" stroke={color} strokeWidth="1.5" strokeDasharray="2,1" />
+        </>
+      );
+    case 'dead-air':
+      // Two flat lines (motion + audio meters) crossed by a hush mark.
+      return (
+        <>
+          <Line x1="3" y1="11" x2="29" y2="11" stroke={color} strokeWidth="1.5" strokeOpacity="0.4" />
+          <Line x1="3" y1="11" x2="14" y2="11" stroke={color} strokeWidth="2.5" />
+          <Line x1="3" y1="21" x2="29" y2="21" stroke={color} strokeWidth="1.5" strokeOpacity="0.4" />
+          <Line x1="3" y1="21" x2="11" y2="21" stroke={color} strokeWidth="2.5" />
+          <Circle cx="22" cy="16" r="4" fill="none" stroke={color} strokeWidth="1.5" />
+          <Line x1="19" y1="16" x2="25" y2="16" stroke={color} strokeWidth="1.5" />
+        </>
+      );
+    case 'walk-the-line':
+      // A small figure walking along a vertical line, with a slight drift.
+      return (
+        <>
+          <Line x1="16" y1="3" x2="16" y2="29" stroke={color} strokeWidth="2" strokeDasharray="2,2" />
+          <Circle cx="16" cy="9" r="3" fill={color} />
+          <Path d="M 12 13 L 20 13 L 18 21 L 19 27 M 18 21 L 14 27" stroke={color} strokeWidth="1.5" fill="none" />
+        </>
+      );
+    case 'slipstream':
+      // Glow-bug streaking forward: small dot + curving trail behind.
+      return (
+        <>
           <Path
-            d="M 16 2 L 26 8 L 26 22 L 22 28 L 10 28 L 6 22 L 6 8 Z"
-            fill={color}
-            opacity={0.85}
+            d="M 4 22 Q 9 22 12 16 T 22 12"
+            stroke={color}
+            strokeWidth="2"
+            fill="none"
+            strokeOpacity="0.4"
           />
-          {/* Face shadow */}
+          <Circle cx="22" cy="12" r="3" fill={color} />
+          <Circle cx="22" cy="12" r="5" fill={color} fillOpacity="0.3" />
+          {/* Obstacle wall with gap */}
+          <Line x1="28" y1="3" x2="28" y2="9" stroke={color} strokeWidth="2" />
+          <Line x1="28" y1="14" x2="28" y2="29" stroke={color} strokeWidth="2" />
+        </>
+      );
+    case 'polaroid':
+      // Polaroid card silhouette — outer rectangle, inner photo, dot for shutter.
+      return (
+        <>
+          <Rect x="4" y="6" width="24" height="22" stroke={color} strokeWidth="2" fill="none" />
+          <Rect x="7" y="9" width="18" height="13" fill={color} fillOpacity={0.6} />
+          <Circle cx="22" cy="25" r="1.5" fill={color} />
+          <Circle cx="18" cy="25" r="1.5" fill={color} fillOpacity={0.5} />
+        </>
+      );
+    case 'tilt-maze':
+      // Winding path with a ball at the end — reads as "rolling through."
+      return (
+        <>
           <Path
-            d="M 10 11 L 22 11 L 22 22 L 18 26 L 14 26 L 10 22 Z"
-            fill="#08080f"
+            d="M 4 6 Q 14 6 14 14 Q 14 22 22 22 L 28 22"
+            stroke={color}
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
           />
-          {/* Single eye */}
-          <Circle cx="16" cy="17" r="2" fill={color} />
+          <Circle cx="6" cy="6" r="2.5" fill={color} fillOpacity="0.4" />
+          <Circle cx="28" cy="22" r="3.5" fill={color} />
         </>
       );
     case 'minesweep':

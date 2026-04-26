@@ -80,18 +80,25 @@ export default function ResultScreen() {
     // TODO: Supabase write happens here once backend is wired.
   };
 
-  // PLAY AGAIN goes straight back to play for built games (instant retry,
-  // arcade-style); falls back to the pre-game card for stubs.
+  // PLAY AGAIN charges a token (or is free if this is today's daily).
+  // Insufficient → routes to /shop. Live games go straight to their
+  // play screen for arcade-feel instant retry; stubs go to pre-game.
   const playAgain = () => {
-    if (game.id === 'tap-bullseye') {
-      router.replace('/play/tap-bullseye');
-    } else if (game.id === 'minesweep') {
-      router.replace('/play/minesweep');
-    } else if (game.id === 'ghost') {
-      router.replace('/play/ghost');
-    } else {
-      router.replace({ pathname: '/game/[id]', params: { id: game.id } });
+    if (!player.spendTokenFor(game.id)) {
+      router.replace('/shop');
+      return;
     }
+    if (game.id === 'tap-bullseye') router.replace('/play/tap-bullseye');
+    else if (game.id === 'minesweep') router.replace('/play/minesweep');
+    else if (game.id === 'tilt-maze') router.replace('/play/tilt-maze');
+    else if (game.id === 'polaroid') router.replace('/play/polaroid');
+    else if (game.id === 'walk-the-line') router.replace('/play/walk-the-line');
+    else if (game.id === 'slipstream') router.replace('/play/slipstream');
+    else if (game.id === 'dead-air') router.replace('/play/dead-air');
+    else if (game.id === 'trivia') router.replace('/play/trivia');
+    else if (game.id === 'draw-it') router.replace('/play/draw-it');
+    else if (game.id === 'pulse') router.replace('/play/pulse');
+    else router.replace({ pathname: '/game/[id]', params: { id: game.id } });
   };
 
   const displayRows = pickDisplayRows(placement.ranked, placement.playerRank);

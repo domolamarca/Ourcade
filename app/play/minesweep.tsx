@@ -33,6 +33,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
 import { GameIcon } from '../../src/components/GameIcon';
+import { InGameExit } from '../../src/components/InGameExit';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { colors, neon, spacing } from '../../src/theme';
 
@@ -593,6 +594,7 @@ export default function MinesweepGame() {
         ) : null}
 
         <ScanlineOverlay opacity={0.05} />
+        <InGameExit />
       </Pressable>
     </View>
   );

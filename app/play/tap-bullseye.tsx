@@ -26,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
 import { GameIcon } from '../../src/components/GameIcon';
+import { InGameExit } from '../../src/components/InGameExit';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { colors, neon, spacing } from '../../src/theme';
 
@@ -622,6 +623,7 @@ export default function TapBullseyeGame() {
         )}
 
         <ScanlineOverlay opacity={0.06} />
+        <InGameExit />
       </Pressable>
     </View>
   );

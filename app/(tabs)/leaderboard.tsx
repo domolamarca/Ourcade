@@ -29,14 +29,14 @@ export default function LeaderboardScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <View style={{ padding: spacing.lg, paddingBottom: spacing.sm }}>
+        <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.sm, paddingBottom: spacing.xs }}>
           <ArcadeText variant="pixel" size={9} color={colors.textMute}>
             {'>> HIGH SCORE TABLE'}
           </ArcadeText>
-          <View style={{ height: 4 }} />
+          <View style={{ height: 2 }} />
           <ArcadeText
             variant="pixel"
-            size={20}
+            size={18}
             color={neon('yellow')}
             glowColor={neon('yellow')}
           >
@@ -51,7 +51,7 @@ export default function LeaderboardScreen() {
           flexDirection: 'row',
           paddingHorizontal: spacing.lg,
           gap: spacing.sm,
-          marginBottom: spacing.sm,
+          paddingBottom: spacing.xs,
         }}
       >
         {TIMEFRAMES.map((t) => {
@@ -60,7 +60,7 @@ export default function LeaderboardScreen() {
             <Pressable key={t.key} onPress={() => setTimeframe(t.key)}>
               <View
                 style={{
-                  paddingVertical: 6,
+                  paddingVertical: 4,
                   paddingHorizontal: 10,
                   borderWidth: 1,
                   borderColor: active ? neon('yellow') : colors.border,
@@ -80,11 +80,16 @@ export default function LeaderboardScreen() {
         })}
       </View>
 
-      {/* Game selector */}
+      {/* Game selector pills */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: spacing.lg, gap: spacing.sm }}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.lg,
+          gap: spacing.sm,
+          alignItems: 'center',
+        }}
+        style={{ maxHeight: 36, flexGrow: 0 }}
       >
         {games.map((g) => {
           const active = g.id === gameId;
@@ -99,7 +104,7 @@ export default function LeaderboardScreen() {
             >
               <View
                 style={{
-                  paddingVertical: 6,
+                  paddingVertical: 4,
                   paddingHorizontal: 10,
                   borderWidth: active ? 2 : 1,
                   borderColor: active ? c : colors.border,
@@ -120,34 +125,36 @@ export default function LeaderboardScreen() {
         })}
       </ScrollView>
 
-      {/* Ranking */}
+      {/* Column header — sits flush against the pills */}
+      <View
+        style={{
+          flexDirection: 'row',
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.sm,
+          paddingBottom: spacing.xs,
+          borderBottomWidth: 2,
+          borderColor: accent,
+        }}
+      >
+        <View style={{ width: 36 }}>
+          <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'#'}</ArcadeText>
+        </View>
+        <View style={{ width: 56 }}>
+          <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'NAME'}</ArcadeText>
+        </View>
+        <View style={{ flex: 1 }}>
+          <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'GAME'}</ArcadeText>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'SCORE'}</ArcadeText>
+        </View>
+      </View>
+
+      {/* Ranking list */}
       <ScrollView
-        style={{ flex: 1, marginTop: spacing.md }}
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: spacing.huge }}
       >
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingHorizontal: spacing.md,
-            paddingBottom: spacing.xs,
-            borderBottomWidth: 2,
-            borderColor: accent,
-          }}
-        >
-          <View style={{ width: 36 }}>
-            <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'#'}</ArcadeText>
-          </View>
-          <View style={{ width: 56 }}>
-            <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'NAME'}</ArcadeText>
-          </View>
-          <View style={{ flex: 1 }}>
-            <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'GAME'}</ArcadeText>
-          </View>
-          <View style={{ alignItems: 'flex-end' }}>
-            <ArcadeText variant="pixel" size={7} color={colors.textMute}>{'SCORE'}</ArcadeText>
-          </View>
-        </View>
-
         {scores.length === 0 ? (
           <View style={{ padding: spacing.xl, alignItems: 'center' }}>
             <ArcadeText variant="pixel" size={10} color={colors.textMute}>

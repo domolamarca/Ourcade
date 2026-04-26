@@ -16,7 +16,25 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Ourcade uses your camera for the POLAROID spot-the-difference minigame."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Ourcade uses motion data to count steps for the WALK THE LINE minigame."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Ourcade listens for ambient noise during the DEAD AIR minigame."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

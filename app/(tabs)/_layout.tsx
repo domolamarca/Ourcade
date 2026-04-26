@@ -37,11 +37,19 @@ function TabLabel({ focused, label, color }: { focused: boolean; label: string; 
       color={focused ? color : colors.textMute}
       glowColor={focused ? color : undefined}
       style={{ marginTop: 2 }}
+      numberOfLines={1}
     >
       {label}
     </ArcadeText>
   );
 }
+
+// Wide-enough column so the label doesn't wrap to a second line. The
+// icon naturally centers within whatever width the parent gives it.
+const tabColumnStyle = {
+  alignItems: 'center' as const,
+  width: 90,
+};
 
 export default function TabsLayout() {
   return (
@@ -63,7 +71,7 @@ export default function TabsLayout() {
         name="home"
         options={{
           tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center' }}>
+            <View style={tabColumnStyle}>
               <TabGlyph focused={focused} glyph="◆" color={neon('magenta')} />
               <TabLabel focused={focused} label="MENU" color={neon('magenta')} />
             </View>
@@ -74,7 +82,7 @@ export default function TabsLayout() {
         name="leaderboard"
         options={{
           tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center' }}>
+            <View style={tabColumnStyle}>
               <TabGlyph focused={focused} glyph="★" color={neon('yellow')} />
               <TabLabel focused={focused} label="SCORES" color={neon('yellow')} />
             </View>
@@ -85,7 +93,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           tabBarIcon: ({ focused }) => (
-            <View style={{ alignItems: 'center' }}>
+            <View style={tabColumnStyle}>
               <TabGlyph focused={focused} glyph="◉" color={neon('cyan')} />
               <TabLabel focused={focused} label="PLAYER" color={neon('cyan')} />
             </View>

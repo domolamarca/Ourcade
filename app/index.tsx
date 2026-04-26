@@ -5,7 +5,6 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../src/components/ArcadeText';
 import { Blink } from '../src/components/Blink';
-import { Marquee } from '../src/components/Marquee';
 import { ScanlineOverlay } from '../src/components/ScanlineOverlay';
 import { colors, neon, spacing } from '../src/theme';
 
@@ -14,13 +13,6 @@ export default function TitleScreen() {
 
   return (
     <Pressable style={{ flex: 1, backgroundColor: colors.bg }} onPress={enter}>
-      <Marquee
-        text="★ INSERT COIN ★ TAP BULLSEYE WR: 187,420 PTS BY KAT ★ 1P TAP TO PLAY ★ OURCADE ★"
-        color={neon('yellow')}
-        glowColor={neon('yellow')}
-        size={10}
-      />
-
       <SafeAreaView style={{ flex: 1, justifyContent: 'space-between' }}>
         <View style={{ alignItems: 'center', marginTop: spacing.huge }}>
           {/* Tagline badge */}
