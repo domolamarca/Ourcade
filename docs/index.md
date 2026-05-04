@@ -2,6 +2,8 @@
 title: Ourcade
 ---
 
+<p align="center"><img src="ourcade-logo.svg" alt="Ourcade" width="320" /></p>
+
 # Ourcade
 
 Sensor mini-game arcade for iOS.
