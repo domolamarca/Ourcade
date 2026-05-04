@@ -16,10 +16,12 @@ import { ScanlineOverlay } from '../src/components/ScanlineOverlay';
 import { usePlayer } from '../src/data/player';
 import { colors, neon, spacing } from '../src/theme';
 
-// Replace these with your real hosted URLs before App Store submission.
-// Apple will reject the build if these 404 or are missing.
-const PRIVACY_URL = 'https://ourcade.app/privacy';
-const TERMS_URL = 'https://ourcade.app/terms';
+// Hosted on GitHub Pages from /docs in this repo. Enable Pages in repo
+// settings → Pages → Deploy from branch: main, folder: /docs. If you
+// later move to a custom domain, redirect from these URLs so the app
+// shipped to TestFlight + the App Store keeps working.
+const PRIVACY_URL = 'https://domolamarca.github.io/Ourcade/privacy.html';
+const TERMS_URL = 'https://domolamarca.github.io/Ourcade/terms.html';
 
 export default function SettingsScreen() {
   const player = usePlayer();

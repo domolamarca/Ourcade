@@ -54,7 +54,7 @@ type CatStats = {
 };
 
 export default function TriviaGame() {
-  const sequenceRef = useRef<TriviaSequence>();
+  const sequenceRef = useRef<TriviaSequence | null>(null);
   if (!sequenceRef.current) sequenceRef.current = new TriviaSequence();
   const [currentQ, setCurrentQ] = useState<TriviaQuestion>(() =>
     sequenceRef.current!.next(),
@@ -513,7 +513,7 @@ export default function TriviaGame() {
           const isPicked = pickedIdx === i;
           const isCorrect = i === q.correctIdx;
           const reveal = phase === 'reveal';
-          let borderColor = colors.border;
+          let borderColor: string = colors.border;
           let fill: string | undefined = colors.bgSurface;
           if (reveal) {
             if (isCorrect) {

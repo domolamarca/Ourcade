@@ -63,6 +63,10 @@ export default function PreGameScreen() {
   const outOfTokens = !isDaily && player.tokens <= 0;
 
   function startGame() {
+    // Re-narrow `game` for TS inside this closure — the parent scope's
+    // early return doesn't propagate through nested function bodies.
+    // At runtime this is a no-op because the parent already returned.
+    if (!game) return;
     if (outOfTokens || inserting) {
       if (outOfTokens) router.push('/shop');
       return;

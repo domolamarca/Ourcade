@@ -18,21 +18,15 @@
       "expo-router",
       "expo-asset",
       [
-        "expo-camera",
-        {
-          "cameraPermission": "Ourcade uses your camera for the POLAROID spot-the-difference minigame."
-        }
-      ],
-      [
         "expo-sensors",
         {
-          "motionPermission": "Ourcade uses motion data to count steps for the WALK THE LINE minigame."
+          "motionPermission": "Ourcade reads motion sensors so you can play tilt-, shake-, and rotation-based cabinets like TILT MAZE, BOUNCE, FLIP, SHAKE METER, and VECTOR."
         }
       ],
       [
         "expo-av",
         {
-          "microphonePermission": "Ourcade listens for ambient noise during the DEAD AIR minigame."
+          "microphonePermission": "Ourcade samples ambient sound for the DEAD AIR cabinet, which scores how quietly you can hold the phone."
         }
       ]
     ],

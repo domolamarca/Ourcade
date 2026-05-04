@@ -391,6 +391,11 @@ export default function VectorGame() {
         Math.random() * (POWERUP_INTERVAL_MAX_MS - POWERUP_INTERVAL_MIN_MS);
     }
 
+    // Cached ship X used by both the power-up pickup check below and
+    // the asteroid collision check further down. Declared once here so
+    // we don't read the ref twice and so TS narrows for both loops.
+    const shipX = shipXRef.current;
+
     // --- Move power-ups + check ship pickup ------------------------
     for (let i = powerUpsRef.current.length - 1; i >= 0; i--) {
       const p = powerUpsRef.current[i];
@@ -425,7 +430,6 @@ export default function VectorGame() {
     }
 
     // --- Move asteroids + check ship collisions -------------------
-    const shipX = shipXRef.current;
     const invuln = now - lastHitAtRef.current < HIT_INVULN_MS;
     for (let i = asteroidsRef.current.length - 1; i >= 0; i--) {
       const a = asteroidsRef.current[i];

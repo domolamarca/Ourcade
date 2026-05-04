@@ -1,0 +1,18 @@
+# GitHub Pages configuration for Ourcade legal docs.
+#
+# This config makes the /docs folder build with Jekyll's default
+# minimal theme. The pages are reachable at:
+#   https://domolamarca.github.io/Ourcade/
+#   https://domolamarca.github.io/Ourcade/privacy.html
+#   https://domolamarca.github.io/Ourcade/terms.html
+#
+# Enable Pages in repo settings under Pages → "Deploy from a branch"
+# → Branch: main → Folder: /docs.
+
+title: Ourcade
+description: Privacy Policy and Terms of Service for Ourcade
+theme: jekyll-theme-minimal
+
+# Strip the default "Ourcade" header link if you ever wire a marketing
+# site at the same domain.
+markdown: kramdown
