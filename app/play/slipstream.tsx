@@ -58,7 +58,7 @@ import { colors, neon, spacing } from '../../src/theme';
 // STREAM DEMO MODE — when true, compresses the difficulty ramp so every
 // obstacle type appears within the first ~20 seconds. Useful for
 // showcase / streaming. Flip to false for normal gameplay.
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 const DEMO_TIME_SCALE = DEMO_MODE ? 3 : 1;
 // =====================================================================
 
@@ -87,13 +87,13 @@ const SCROLL_INITIAL = 160;
 const SCROLL_RAMP_PER_SECOND = 4;
 const SCROLL_MAX = 360;
 
-// TALL-wall spacing — tightened from the original 460-640 range, but
-// loosened slightly from the previous ultra-tight pass. Sits between
-// the two so the rhythm has variety but never goes mind-numbingly wide.
-const TALL_GAP_MIN_INITIAL = 420;
-const TALL_GAP_MIN_LATE = 330;
-const TALL_GAP_MAX_INITIAL = 570;
-const TALL_GAP_MAX_LATE = 430;
+// TALL-wall spacing — opens dense from the start and tightens further
+// as the run progresses. Initial bands shrunk from 420-570 → 340-460
+// so the rhythm doesn't feel sparse on the first 10 seconds.
+const TALL_GAP_MIN_INITIAL = 340;
+const TALL_GAP_MIN_LATE = 270;
+const TALL_GAP_MAX_INITIAL = 460;
+const TALL_GAP_MAX_LATE = 360;
 
 const SHORT_BAR_WIDTH = 28;
 
@@ -183,6 +183,11 @@ export default function SlipstreamGame() {
   const [score, setScore] = useState(0);
   const [multiplier, setMultiplier] = useState(1);
   const [streakCount, setStreakCount] = useState(0);
+  // BOUNCE count = total taps during this run. Surfaces in the HUD
+  // instead of streak (orbs are too sparse for streak to feel earned).
+  // Streak still drives the multiplier internally — the bonus fires
+  // when it does, just isn't shown as a number.
+  const [bounceCount, setBounceCount] = useState(0);
   const [endReason, setEndReason] = useState<'CRASHED' | 'BOMB' | null>(null);
 
   // Refs (game loop state)
@@ -258,6 +263,7 @@ export default function SlipstreamGame() {
     wallsSinceMineFieldRef.current = 0;
     setMultiplier(1);
     setStreakCount(0);
+    setBounceCount(0);
     setScore(0);
     setEndReason(null);
     startTimeRef.current = Date.now();
@@ -678,6 +684,7 @@ export default function SlipstreamGame() {
     }
     if (phaseRef.current === 'playing') {
       bugVyRef.current = FLAP_VY;
+      setBounceCount((c) => c + 1);
       Haptics.selectionAsync().catch(() => {});
     }
   }
@@ -735,16 +742,16 @@ export default function SlipstreamGame() {
                   color={mulColor(multiplier)}
                   glowColor={mulColor(multiplier)}
                 >
-                  {`x${multiplier} STREAK`}
+                  {`x${multiplier} BONUS`}
                 </ArcadeText>
               ) : null}
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <ArcadeText variant="pixel" size={7} color={colors.textMute}>
-                {'STREAK'}
+                {'BOUNCES'}
               </ArcadeText>
               <ArcadeText variant="mono" size={22} color={ACCENT} glowColor={ACCENT}>
-                {String(streakCount).padStart(2, '0')}
+                {String(bounceCount).padStart(3, '0')}
               </ArcadeText>
             </View>
           </View>

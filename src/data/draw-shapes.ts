@@ -711,17 +711,87 @@ export function renderTemplate(
   return tpl.map((p) => ({ x: cx + p.x * r, y: cy + p.y * r }));
 }
 
-export function scoreShape(kind: ShapeKind, playerPath: Pt[]): number {
+export function scoreShape(
+  kind: ShapeKind,
+  playerPath: Pt[],
+  canvasW?: number,
+  canvasH?: number,
+): number {
   if (playerPath.length < 5) return 0;
   const def = SHAPES[kind];
+
+  let raw = 0;
   switch (def.scoreMethod) {
     case 'CIRCLE':
-      return scoreCircle(playerPath);
+      raw = scoreCircle(playerPath);
+      break;
     case 'POLYGON':
-      return scorePolygon(playerPath, def.expectedCorners ?? 4);
+      raw = scorePolygon(playerPath, def.expectedCorners ?? 4);
+      break;
     case 'TEMPLATE':
-      return scoreTemplate(playerPath, def.template(), def.closed);
+      raw = scoreTemplate(playerPath, def.template(), def.closed);
+      break;
   }
+
+  // Position + size guard. The CIRCLE / POLYGON / TEMPLATE scorers are
+  // intentionally position- and (mostly) size-invariant so that "did
+  // you draw a triangle" doesn't depend on where your finger landed.
+  // The downside: a tiny square drawn in the upper-left corner scores
+  // the same as a centered, full-sized one. This guard caps that off
+  // by gently penalizing drawings whose centroid drifts far from the
+  // canvas center or whose bounding box is far off the target radius.
+  // Generous bands so a slightly-off drawing isn't punished — only
+  // egregiously misplaced or wrong-size attempts get docked.
+  if (canvasW != null && canvasH != null) {
+    raw = Math.round(raw * positionAndSizeFactor(playerPath, canvasW, canvasH));
+  }
+  return raw;
+}
+
+/**
+ * Multiplier in [0, 1] for how well the player's drawing matches the
+ * canvas position and size of the target preview.
+ *
+ * - Position: full credit if drawing centroid is within 0.6 × target
+ *   radius of canvas center; ramps to zero by 1.2 × target radius.
+ * - Size: full credit at 0.7-1.6× target radius; ramps to zero outside
+ *   [0.4, 2.4]. Tolerances are deliberately wide on the high end since
+ *   "drew it bigger" is a less common failure than "drew it tiny."
+ */
+export function positionAndSizeFactor(
+  path: Pt[],
+  canvasW: number,
+  canvasH: number,
+): number {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const p of path) {
+    if (p.x < minX) minX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y > maxY) maxY = p.y;
+  }
+  const playerCx = (minX + maxX) / 2;
+  const playerCy = (minY + maxY) / 2;
+  const playerRadius = Math.max((maxX - minX) / 2, (maxY - minY) / 2);
+
+  const targetCx = canvasW / 2;
+  const targetCy = canvasH / 2;
+  const targetRadius = Math.min(canvasW, canvasH) * 0.36;
+
+  const centerDist = Math.hypot(playerCx - targetCx, playerCy - targetCy);
+  // Full credit until 0.6r off center, then linear to 0 at 1.2r.
+  let positionScore: number;
+  if (centerDist <= targetRadius * 0.6) positionScore = 1;
+  else positionScore = clamp(1 - (centerDist - targetRadius * 0.6) / (targetRadius * 0.6), 0, 1);
+
+  const ratio = playerRadius / Math.max(targetRadius, 1);
+  let sizeScore: number;
+  if (ratio < 0.4 || ratio > 2.4) sizeScore = 0;
+  else if (ratio < 0.7) sizeScore = (ratio - 0.4) / 0.3;
+  else if (ratio > 1.6) sizeScore = (2.4 - ratio) / 0.8;
+  else sizeScore = 1;
+
+  return positionScore * sizeScore;
 }
 
 // --- CIRCLE: coefficient of variation of distances from centroid -----
@@ -741,7 +811,10 @@ function scoreCircle(path: Pt[]): number {
     path[0].y - path[path.length - 1].y,
   );
   const closureScore = clamp(1 - closure / (m * 0.5), 0, 1);
-  const roundness = clamp(1 - cv / 0.20, 0, 1);
+  // cv tolerance loosened from 0.20 → 0.25 — hand-drawn circles
+  // typically land in 0.10–0.20 range; 0.20 was too punishing for
+  // anything but a near-perfect attempt.
+  const roundness = clamp(1 - cv / 0.25, 0, 1);
   return Math.round(1000 * roundness * (0.6 + 0.4 * closureScore));
 }
 

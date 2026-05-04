@@ -200,7 +200,10 @@ export default function DrawItGame() {
       const r = computeShapeRadius();
       score = scoreBisect(player, canvas.w, canvas.h, r);
     } else {
-      score = scoreShape(plan.shape, player);
+      // Pass canvas dimensions so scoreShape can apply its position +
+      // size guard — keeps bounds-normalized polygons honest about
+      // where on the screen they were drawn.
+      score = scoreShape(plan.shape, player, canvas.w, canvas.h);
     }
 
     totalScoreRef.current += score;
