@@ -430,7 +430,7 @@ export default function PreGameScreen() {
                     color={colors.textDim}
                     align="center"
                   >
-                    {'TAP TO BUY MORE'}
+                    {'TAP TO CLAIM DAILY'}
                   </ArcadeText>
                 </View>
               ) : game.status === 'live' ? (

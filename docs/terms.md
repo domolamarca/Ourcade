@@ -22,18 +22,15 @@ solely for personal, non-commercial use. You may not:
 - Remove copyright or proprietary notices
 - Use the app to interfere with our servers or other players
 
-## 2. Tokens and in-app purchases
+## 2. Credits
 
-Tokens are a virtual currency used inside Ourcade to start non-daily
+Credits are a virtual currency used inside Ourcade to start non-daily
 plays. They have **no real-world value**, cannot be redeemed for cash,
 and cannot be transferred between accounts.
 
-In-app purchases are processed by Apple. Refund requests must be made
-through Apple per their refund policy:
-<https://support.apple.com/HT204084>
-
-Promo codes, daily drops, and personal-best bonus tokens are gifts and
-can be revoked or rebalanced at any time.
+Credits are granted via the daily drop, the welcome bonus, personal-
+best bonuses, and promo codes. All grants are gifts and can be revoked
+or rebalanced at any time.
 
 ## 3. Leaderboards and code of conduct
 
@@ -74,11 +71,9 @@ score data will never be lost.
 
 TO THE MAXIMUM EXTENT PERMITTED BY LAW, WE WILL NOT BE LIABLE FOR ANY
 INDIRECT, INCIDENTAL, CONSEQUENTIAL, SPECIAL, EXEMPLARY, OR PUNITIVE
-DAMAGES, INCLUDING LOST TOKENS, LOST SCORES, OR LOST TIME, ARISING OUT
+DAMAGES, INCLUDING LOST CREDITS, LOST SCORES, OR LOST TIME, ARISING OUT
 OF OR IN CONNECTION WITH YOUR USE OF THE APP. OUR TOTAL LIABILITY FOR
-ANY CLAIM ARISING FROM THE APP IS LIMITED TO THE GREATER OF TEN DOLLARS
-USD OR THE AMOUNT YOU HAVE PAID FOR IN-APP PURCHASES IN THE 90 DAYS
-PRECEDING THE CLAIM.
+ANY CLAIM ARISING FROM THE APP IS LIMITED TO TEN DOLLARS USD.
 
 ## 8. Termination
 

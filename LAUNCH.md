@@ -54,32 +54,20 @@ Apple distributes the app itself for free — once approved, the `.ipa` lives on
 - [ ] First production build: `eas build --platform ios --profile production`
 - [ ] Verify build downloads + opens on a physical device (TestFlight or direct install)
 
-## 5. Token economy + In-App Purchase
+## 5. Credit economy
 
-Strategy: ship with a generous free tier AND real IAP. Full plan in `MONETIZATION.md`.
+v1.0 ships **free** — no purchases of any kind. The credit system is
+fully self-sustaining via the daily drop, the welcome bonus, personal-
+best bonuses, and promo codes. No payment surface exists in the v1.0
+build, no products are configured in App Store Connect, no tax forms
+are required.
 
-### 5a. Free-tier mitigations (LIVE — works in Expo Go)
-- [x] AsyncStorage persistence for player state (tokens, initials, redeemed codes survive app kill)
+- [x] AsyncStorage persistence for player state (credits, initials, redeemed codes survive app kill)
 - [x] First-launch initials prompt — new players pick their 3 letters before the lobby
-- [x] 7-day welcome bonus — 100 tokens/day for first week, 50/day after
-- [x] Personal-best token rewards — +5 PB, +20 first top-10, +50 first #1
+- [x] 7-day welcome bonus — 100 credits/day for first week, 50/day after
+- [x] Personal-best credit rewards — +5 PB, +20 first top-10, +50 first #1
 - [x] Daily challenge cabinet always free
 - [x] Promo code system
-
-### 5b. Real IAP (NEEDS EAS BUILD — see `IAP_SETUP.md`)
-- [ ] Register 5 IAP products in App Store Connect with IDs `com.ourcade.tokens.{starter,value,power,tournament,legend}`
-- [ ] Set price tier on each (Tier 1, 2, 4, 10, 20)
-- [ ] Add localized name + description + review screenshot for each
-- [ ] Accept Paid Apps Agreement + fill tax forms + add bank account
-- [ ] Opt into Small Business Program (15% Apple cut vs 30%)
-- [ ] Generate sandbox tester accounts
-- [ ] `npm install react-native-iap`
-- [ ] Add `react-native-iap` to `app.json` plugins array
-- [ ] Create `src/lib/iap.ts` wrapper (code template in `IAP_SETUP.md`)
-- [ ] Wire shop.tsx BUY buttons to real StoreKit flow
-- [ ] EAS Build dev client: `eas build --platform ios --profile development`
-- [ ] Sign in to sandbox tester on iPhone, install dev build, test each pack
-- [ ] (v1.1) Server-side receipt validation via Supabase Edge Function
 
 ## 6. Leaderboard — Supabase (chosen)
 
@@ -172,7 +160,6 @@ Code wiring is **complete**. Falls back to mock data until you plug in real cred
 
 ## 13. Post-launch (v1.1+)
 
-- [ ] Wire real IAP if Path A was chosen
 - [ ] Add a backend if Game Center isn't enough
 - [ ] Push notifications (daily challenge reminder?)
 - [ ] iPad support (currently `supportsTablet: false`)
@@ -182,6 +169,6 @@ Code wiring is **complete**. Falls back to mock data until you plug in real cred
 
 ---
 
-**Fastest possible path:** Path A (skip IAP) + Path A (local-only leaderboards) + minimal screenshots + simple privacy page = ~5 focused days from "now" to "submitted." First review usually completes within 48h.
+**Fastest possible path:** v1.0 ships free (no IAP) + Supabase leaderboards + minimal screenshots + hosted privacy page = ~5 focused days from "now" to "submitted." First review usually completes within 48h.
 
 Last updated: 2026-05-03

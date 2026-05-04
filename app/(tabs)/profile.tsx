@@ -131,7 +131,7 @@ export default function ProfileScreen() {
           </NeonFrame>
         </View>
 
-        {/* Settings — sound, haptics, restore purchases, legal, delete account. */}
+        {/* Settings — sound, haptics, promo code, legal, delete account. */}
         <View style={{ height: spacing.xl }} />
         <Pressable onPress={() => router.push('/settings')}>
           <NeonFrame

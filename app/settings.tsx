@@ -4,7 +4,6 @@
 // privacy / terms links, and (per Apple guidelines) a DELETE ACCOUNT
 // flow that wipes local state. Reachable from the Player tab.
 
-import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -30,7 +29,6 @@ const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Ou
 
 export default function SettingsScreen() {
   const player = usePlayer();
-  const [restoring, setRestoring] = useState(false);
 
   const settings = player.settings;
 
@@ -43,23 +41,6 @@ export default function SettingsScreen() {
       if (settings.hapticsOn) {
         Haptics.selectionAsync().catch(() => {});
       }
-    }
-  };
-
-  const restorePurchases = async () => {
-    if (restoring) return;
-    setRestoring(true);
-    try {
-      // TODO: wire to react-native-iap once IAP module is fully linked.
-      // For now this is a placebo button so reviewers see the affordance —
-      // ship a real restore by launch.
-      await new Promise((r) => setTimeout(r, 800));
-      Alert.alert(
-        'No Purchases Found',
-        'No previous Ourcade purchases were detected on this Apple ID. If you believe this is wrong, sign out and back into the App Store, then try again.',
-      );
-    } finally {
-      setRestoring(false);
     }
   };
 
@@ -159,21 +140,15 @@ export default function SettingsScreen() {
           />
         </NeonFrame>
 
-        {/* PURCHASES */}
+        {/* CREDITS — promo code only in v1.0; restore-purchases is
+            intentionally absent because the app has no IAP surface. */}
         <View style={{ height: spacing.xl }} />
-        <SectionLabel text="PURCHASES" />
+        <SectionLabel text="CREDITS" />
         <NeonFrame color={colors.border} thickness={1} glow={false} padding={0}>
           <Row
             label="REDEEM PROMO CODE"
             sub="Enter a code from a friend or campaign"
             onPress={() => router.push('/shop')}
-          />
-          <Divider />
-          <Row
-            label={restoring ? 'CHECKING…' : 'RESTORE PURCHASES'}
-            sub="Re-link any token packs you bought before"
-            onPress={restorePurchases}
-            disabled={restoring}
           />
         </NeonFrame>
 

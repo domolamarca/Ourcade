@@ -40,19 +40,12 @@ We do **not** collect your real name, email address, phone number,
 contact list, photos, location, IP-derived precise location, advertising
 identifiers, or biometric data.
 
-**Provided to Apple, not to us**, when you make an in-app purchase:
-
-- An anonymized purchase receipt that Apple uses to verify the purchase
-
-We never see your Apple ID, payment method, or billing address.
-
 ## 3. How we use the information
 
 - Display global leaderboards and compute your rank inside the app
 - Award daily-challenge bonuses, personal-best bonuses, top-10 bonuses
   and top-1 bonuses based on your scores
 - Persist your progress between app launches
-- Process in-app token purchases through Apple's payment system
 
 We do not sell your data, share it with advertisers, or use it to build
 a profile of you outside the app.
@@ -65,9 +58,9 @@ app and submitted scores, contact us and we will remove the records.
 
 ## 5. Third parties we use
 
-- **Apple** — App Store distribution, in-app purchases, push
-  notifications (if enabled in a future update). Apple's privacy
-  practices apply: <https://www.apple.com/legal/privacy/>
+- **Apple** — App Store distribution and (in future updates) push
+  notifications. Apple's privacy practices apply:
+  <https://www.apple.com/legal/privacy/>
 - **Supabase** — leaderboard storage. Supabase processes the score and
   initials data described above on our behalf. Privacy details:
   <https://supabase.com/privacy>

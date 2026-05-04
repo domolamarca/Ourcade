@@ -1,21 +1,23 @@
-// Token shop.
+// Credit shop.
 //
-// Real in-app purchase isn't wired up yet — the StoreKit integration is
-// documented in IAP_SETUP.md but requires an EAS dev build to test, so
-// for now the pack list shows what's COMING but the buttons are
-// clearly disabled. Players can still claim daily drops and redeem
-// promo codes normally.
+// v1.0 ships without any in-app purchases — credits come exclusively
+// from daily drops, the welcome bonus, personal-best bonuses, and
+// promo codes. The pack-store UI is intentionally not rendered (we
+// keep TOKEN_PACKS in player.ts so v1.1 can re-enable it without a
+// data-model change). This screen now offers two surfaces:
+//   1. Daily drop claim (free credits the welcome window grants).
+//   2. Promo code redemption (codes mint free credits — no real money).
 
 import React, { useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { ArcadeText } from '../src/components/ArcadeText';
 import { NeonFrame } from '../src/components/NeonFrame';
 import { ScanlineOverlay } from '../src/components/ScanlineOverlay';
-import { TOKEN_PACKS, usePlayer } from '../src/data/player';
-import { colors, fonts, neon, NeonColor, spacing } from '../src/theme';
+import { usePlayer } from '../src/data/player';
+import { colors, fonts, neon, spacing } from '../src/theme';
 
 type CodeFeedback =
   | { kind: 'idle' }
@@ -59,17 +61,6 @@ export default function Shop() {
         Haptics.NotificationFeedbackType.Error,
       ).catch(() => {});
     }
-  }
-
-  function notifyComingSoon() {
-    // Real IAP isn't wired yet — see IAP_SETUP.md. Pack list still
-    // shows what's coming so players can see the ladder.
-    Alert.alert(
-      'Pack store opens at launch',
-      'Token packs unlock when Ourcade hits the App Store. Until then: claim daily drops above and follow our socials for promo codes.',
-      [{ text: 'Got it' }],
-    );
-    Haptics.selectionAsync().catch(() => {});
   }
 
   function claimFree() {
@@ -317,122 +308,17 @@ export default function Shop() {
             )}
           </NeonFrame>
 
-          {/* Section header — pack store unlocks with App Store launch */}
-          <View style={{ marginTop: spacing.xl, marginBottom: spacing.sm }}>
-            <ArcadeText variant="pixel" size={9} color={colors.textMute}>
-              {'>> PACK  STORE'}
+          {/* Footer note — daily drops + promo codes are the credit
+              economy in v1.0. Pack store deliberately not rendered
+              (Apple guideline 2.3.1 disallows preview of features
+              that aren't yet enabled). */}
+          <View style={{ marginTop: spacing.xl, alignItems: 'center' }}>
+            <ArcadeText variant="pixel" size={9} color={colors.textMute} align="center">
+              {'DAILY DROPS + PROMO CODES'}
             </ArcadeText>
             <View style={{ height: 4 }} />
-            <ArcadeText
-              variant="pixel"
-              size={9}
-              color={neon('orange')}
-              glowColor={neon('orange')}
-            >
-              {'★ UNLOCKING AT LAUNCH ★'}
-            </ArcadeText>
-          </View>
-
-          {/* Packs — disabled preview state until IAP is wired */}
-          {TOKEN_PACKS.map((pack) => {
-            const accent = neon(pack.accent as NeonColor);
-            return (
-              <Pressable
-                key={pack.id}
-                onPress={notifyComingSoon}
-                style={({ pressed }) => ({
-                  marginBottom: spacing.md,
-                  opacity: pressed ? 0.85 : 0.55, // visibly dimmed = "not real yet"
-                })}
-              >
-                <NeonFrame
-                  color={colors.border}
-                  thickness={1}
-                  padding={spacing.md}
-                  glow={false}
-                  fill={colors.bgSurface}
-                >
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.md,
-                    }}
-                  >
-                    {/* Left: name + description */}
-                    <View style={{ flex: 1 }}>
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          gap: 8,
-                        }}
-                      >
-                        <ArcadeText variant="pixel" size={14} color={colors.textDim}>
-                          {pack.label}
-                        </ArcadeText>
-                        {pack.discountPct ? (
-                          <View
-                            style={{
-                              backgroundColor: colors.bgElevated,
-                              paddingHorizontal: 6,
-                              paddingVertical: 2,
-                              borderWidth: 1,
-                              borderColor: accent,
-                            }}
-                          >
-                            <ArcadeText variant="pixel" size={8} color={accent}>
-                              {`-${pack.discountPct}%`}
-                            </ArcadeText>
-                          </View>
-                        ) : null}
-                      </View>
-                      <View style={{ height: 4 }} />
-                      <ArcadeText variant="mono" size={15} color={colors.textMute}>
-                        {pack.description}
-                      </ArcadeText>
-                    </View>
-                    {/* Right: tokens + SOON badge */}
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <ArcadeText
-                        variant="mono"
-                        size={28}
-                        color={colors.textDim}
-                      >
-                        {pack.tokens}
-                      </ArcadeText>
-                      <ArcadeText variant="pixel" size={7} color={colors.textMute}>
-                        {'CREDITS'}
-                      </ArcadeText>
-                      <View style={{ height: 4 }} />
-                      <View
-                        style={{
-                          paddingHorizontal: 6,
-                          paddingVertical: 2,
-                          borderWidth: 1,
-                          borderColor: neon('orange'),
-                        }}
-                      >
-                        <ArcadeText
-                          variant="pixel"
-                          size={9}
-                          color={neon('orange')}
-                          glowColor={neon('orange')}
-                        >
-                          {'SOON'}
-                        </ArcadeText>
-                      </View>
-                    </View>
-                  </View>
-                </NeonFrame>
-              </Pressable>
-            );
-          })}
-
-          {/* Footer note */}
-          <View style={{ marginTop: spacing.md, alignItems: 'center' }}>
             <ArcadeText variant="pixel" size={7} color={colors.textMute} align="center">
-              {'DAILY DROPS + PROMO CODES IN THE MEANTIME'}
+              {'KEEP THE CREDITS FLOWING'}
             </ArcadeText>
           </View>
         </ScrollView>
