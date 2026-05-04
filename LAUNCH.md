@@ -167,6 +167,41 @@ Code wiring is **complete**. Falls back to mock data until you plug in real cred
 - [ ] More cabinets / more shapes / more questions
 - [ ] Live world records pulled from your backend → marquee on title screen
 
+### 13a. Re-enable IAP (was stripped for v1.0 launch — see commit `ad43d88`)
+
+The pack store, RESTORE PURCHASES, and all payment language were removed before v1.0 submission to avoid Apple guideline 2.3.1 issues with preview-of-future-features. The data model is intact — `TOKEN_PACKS` still lives in `src/data/player.ts`. To turn IAP back on:
+
+**App Store Connect setup:**
+- [ ] Complete Paid Apps Agreement + W-9 (US) / foreign tax forms + bank account in App Store Connect → Agreements, Tax, and Banking
+- [ ] Opt into the Small Business Program (15% Apple cut vs 30% — applies if you earned <$1M last year)
+- [ ] Register 5 IAP products with consumable type and IDs `com.ourcade.credits.{starter,value,power,tournament,legend}`
+- [ ] Set price tier on each (Tier 1 = $0.99, Tier 2 = $1.99, Tier 4 = $3.99, Tier 10 = $9.99, Tier 20 = $19.99)
+- [ ] Add localized name + description + screenshot of the in-app purchase point for each product
+- [ ] Generate at least 2 sandbox tester accounts under Users and Access → Sandbox
+
+**Code re-enable:**
+- [ ] `npm install react-native-iap` (or current Apple-recommended package)
+- [ ] Add `react-native-iap` to `app.json` plugins array
+- [ ] Create `src/lib/iap.ts` wrapper exposing `initIap()`, `purchasePack(packId)`, `restorePurchases()`
+- [ ] Wire shop's pack-store section back in (template in git history at commit `ad43d88^`):
+  - Pack render block + `notifyComingSoon` removed alert → real BUY handler
+  - `>> PACK STORE` section header
+  - Pack rows with proper accent colors and price labels
+- [ ] Re-add RESTORE PURCHASES row to Settings → CREDITS section, wired to `iap.restorePurchases()`
+- [ ] Add receipt validation — server-side via Supabase Edge Function (Apple's verifyReceipt endpoint) to defeat LocalIAPStore-style piracy
+- [ ] Handle refund webhook from App Store Server Notifications V2 — revoke credits when Apple notifies you of a refund
+- [ ] EAS dev build → install on device → test each pack with sandbox tester signed in
+- [ ] Submit each IAP product for review alongside the v1.1 build
+
+**Public docs to amend back:**
+- [ ] `docs/privacy.md`: re-add the "Provided to Apple, not to us" section about purchase receipts (template in git history at commit `ad43d88^:docs/privacy.md`)
+- [ ] `docs/terms.md`: re-add the "Tokens and in-app purchases" section (template in git history at same commit)
+- [ ] Update privacy nutrition labels in App Store Connect — "Purchase History" becomes a declared data category once IAP ships
+
+**Recreate the deleted setup guides if useful:**
+- [ ] `IAP_SETUP.md` walkthrough — was deleted in `ad43d88`; reference earlier commits if you want the original template
+- [ ] `MONETIZATION.md` strategy doc — same situation
+
 ---
 
 **Fastest possible path:** v1.0 ships free (no IAP) + Supabase leaderboards + minimal screenshots + hosted privacy page = ~5 focused days from "now" to "submitted." First review usually completes within 48h.
