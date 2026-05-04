@@ -198,6 +198,23 @@ export function needsInitialsSetup(): boolean {
   return !state.initialsChosen;
 }
 
+/** Module-level read of the SOUND toggle. Used by the sound manager so
+ *  it doesn't need to subscribe to the hook. Defaults to true if the
+ *  settings block hasn't been hydrated yet. */
+export function isSoundOn(): boolean {
+  return state.settings?.soundOn ?? true;
+}
+
+/** Same idea for the MUSIC toggle (lobby loop, etc. — not yet wired). */
+export function isMusicOn(): boolean {
+  return state.settings?.musicOn ?? true;
+}
+
+/** And HAPTICS — used by the central sound/haptics dispatch. */
+export function areHapticsOn(): boolean {
+  return state.settings?.hapticsOn ?? true;
+}
+
 function isInWelcomeWindow(now: number): boolean {
   if (state.firstSeenAt === 0) return true;
   return now - state.firstSeenAt < WELCOME_DAYS * ONE_DAY_MS;

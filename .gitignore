@@ -8,3 +8,7 @@ web-build/
 ios/
 android/
 expo-env.d.ts
+
+# Raw audio packs — keep only the role-renamed files in assets/audio/
+assets/audio/_kenney/
+assets/audio/.DS_Store

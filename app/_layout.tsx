@@ -19,7 +19,14 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { loadLeaderboard } from '../src/data/leaderboard';
 import { loadPlayer } from '../src/data/player';
+import { initSentry } from '../src/lib/sentry';
+import { loadSounds } from '../src/lib/sound';
 import { colors } from '../src/theme';
+
+// Init Sentry as early as possible so it can capture errors from the
+// hydration code below. Silent no-op until SENTRY_DSN is filled in
+// at src/lib/sentry-config.ts.
+initSentry();
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   /* irrelevant if it's already dismissed */
@@ -38,6 +45,9 @@ export default function RootLayout() {
   useEffect(() => {
     loadPlayer().catch(() => {});
     loadLeaderboard().catch(() => {});
+    // Preload SFX so the first hit / miss / PB plays without latency.
+    // Failure is non-fatal — playSfx() no-ops if loading didn't finish.
+    loadSounds().catch(() => {});
   }, []);
 
   if (!ready) {

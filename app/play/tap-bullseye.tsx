@@ -28,6 +28,7 @@ import { Blink } from '../../src/components/Blink';
 import { GameIcon } from '../../src/components/GameIcon';
 import { InGameExit } from '../../src/components/InGameExit';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
+import { playSfx } from '../../src/lib/sound';
 import { colors, neon, spacing } from '../../src/theme';
 
 const TARGET_SIZE = 72;
@@ -282,7 +283,12 @@ export default function TapBullseyeGame() {
     setPhaseSafe('done');
 
     if (cause.kind === 'timeout') setKillerId(cause.killer);
-    if (cause.kind === 'miss') setMissAt(cause.at);
+    if (cause.kind === 'miss') {
+      setMissAt(cause.at);
+      // Sharp miss tone right at the failed tap; the result-screen
+      // game-over chime fires after the freeze frame.
+      playSfx('miss');
+    }
 
     // Kill all running animations + scheduled spawns/expiries.
     if (spawnTimeoutRef.current) clearTimeout(spawnTimeoutRef.current);
@@ -335,6 +341,7 @@ export default function TapBullseyeGame() {
       perfectStreakRef.current = 0;
     }
     const newMul = multiplierForStreak(perfectStreakRef.current);
+    const tierUp = newMul > multiplierRef.current;
     if (newMul !== multiplierRef.current) {
       multiplierRef.current = newMul;
       setMultiplier(newMul);
@@ -360,6 +367,10 @@ export default function TapBullseyeGame() {
     const newScore = prevScore + finalScore;
     setScoreSafe(newScore);
     pushHitFx(tapX, tapY, finalScore, isPerfect);
+    // Sharp click on every consume; if this tap crossed a streak tier
+    // boundary (perfectStreak hit 5/10/15) play the streak chime on
+    // top so the multiplier upgrade lands as a discrete moment.
+    playSfx(tierUp ? 'streak' : 'hit');
     checkMilestones(prevScore, newScore);
   }
 

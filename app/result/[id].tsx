@@ -38,6 +38,7 @@ import {
   didBeatActiveChallenge,
   getActiveChallenge,
 } from '../../src/lib/challenge';
+import { playSfx } from '../../src/lib/sound';
 import { colors, neon, spacing } from '../../src/theme';
 
 const TOP_ROWS_BEFORE_GAP = 5;
@@ -125,6 +126,11 @@ export default function ResultScreen() {
           : 'pb';
       setCelebrationTier(tier);
       setShowCelebration(true);
+    } else {
+      // No PB / top-10 / #1 — play the game-over sting. Skipped when
+      // PbCelebration is firing because that overlay plays its own
+      // celebratory cue and a game-over tone underneath would jar.
+      playSfx('game-over');
     }
 
     // Did this run beat an active challenge? Snapshot before clearing

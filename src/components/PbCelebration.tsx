@@ -28,6 +28,7 @@ import { ArcadeText } from './ArcadeText';
 import { Blink } from './Blink';
 import { NeonFrame } from './NeonFrame';
 import { Game } from '../data/games';
+import { playSfx } from '../lib/sound';
 import { colors, neon, spacing } from '../theme';
 
 export type CelebrationTier = 'pb' | 'top10' | 'top1';
@@ -151,6 +152,10 @@ export function PbCelebration({
       }),
     ]).start();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => {});
+    // Celebratory chiptune fanfare on PB / top-10 / world-record.
+    // Single sound for all three tiers — the visual + haptic intensity
+    // already encodes the tier difference.
+    playSfx('pb');
   }, [bannerOpacity, bannerScale]);
 
   // ---- Starburst rays --------------------------------------------------
