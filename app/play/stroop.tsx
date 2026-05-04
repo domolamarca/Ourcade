@@ -30,7 +30,8 @@ import { colors, neon, NeonColor, spacing } from '../../src/theme';
 const TICK_MS = 60;
 const REVEAL_HOLD_MS = 700;
 const RESULT_DELAY_MS = 2400;
-const MAX_STRIKES = 3;
+// One strike and the run ends — sharper stakes than the original 3.
+const MAX_STRIKES = 1;
 const MISMATCH_RATE = 0.8;
 
 const ACCENT = neon('red');
@@ -226,7 +227,7 @@ export default function StroopGame() {
           </Blink>
           <View style={{ height: spacing.sm }} />
           <ArcadeText variant="pixel" size={9} color={colors.textMute}>
-            {endReason === 'STRIKES' ? '3 STRIKES — RUN ENDED' : ''}
+            {endReason === 'STRIKES' ? 'ONE WRONG — RUN ENDED' : ''}
           </ArcadeText>
 
           <View style={{ height: spacing.xl }} />

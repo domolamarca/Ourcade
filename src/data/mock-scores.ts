@@ -82,10 +82,10 @@ export const MOCK_SCORES: Score[] = [
   { id: '185', initials: 'AAA', gameId: 'stroop', score: 3120,  unit: 'PTS', date: '2026-04-21' },
 
   // Reaction Light — lower is better
-  { id: '101', initials: 'ZIP', gameId: 'reaction-light', score: 142, unit: 'MS', date: '2026-04-26' },
-  { id: '102', initials: 'BLZ', gameId: 'reaction-light', score: 156, unit: 'MS', date: '2026-04-25' },
-  { id: '103', initials: 'KAT', gameId: 'reaction-light', score: 167, unit: 'MS', date: '2026-04-25' },
-  { id: '104', initials: 'DOM', gameId: 'reaction-light', score: 184, unit: 'MS', date: '2026-04-26' },
+  { id: '101', initials: 'ZIP', gameId: 'reaction-light', score: 31, unit: 'RD', date: '2026-04-26' },
+  { id: '102', initials: 'BLZ', gameId: 'reaction-light', score: 24, unit: 'RD', date: '2026-04-25' },
+  { id: '103', initials: 'KAT', gameId: 'reaction-light', score: 19, unit: 'RD', date: '2026-04-25' },
+  { id: '104', initials: 'DOM', gameId: 'reaction-light', score: 12, unit: 'RD', date: '2026-04-26' },
 
   // Dead Air
   { id: '130', initials: 'ZEN', gameId: 'dead-air', score: 12420, unit: 'SEC', date: '2026-04-26' },

@@ -145,7 +145,9 @@ export async function submitScore(args: {
 // ----- Sync getters (UI reads from cache) -----------------------------
 
 export function isLowerBetter(gameId: string): boolean {
-  return gameId === 'reaction-light' || gameId === 'spin-360';
+  // reaction-light is now infinite-survival (rounds-survived = higher
+  // better). spin-360 stays lower-better (degrees-off-from-360°).
+  return gameId === 'spin-360';
 }
 
 export function getTopScores(

@@ -529,8 +529,6 @@ function formatVal(score: number, game: ReturnType<typeof getGame>): string {
 // Stub games still get a randomized score so the result-screen flow works.
 function randomScore(gameId: string): number {
   switch (gameId) {
-    case 'reaction-light':
-      return Math.round(180 + Math.random() * 120);
     case 'spin-360':
       return Math.round(Math.random() * 12 * 10) / 10;
     default:
