@@ -11,6 +11,13 @@
 //   Levels 4-5: tighter S-curves and zigzags
 //   Levels 6-7: spirals, narrower
 //   Levels 8-10: hazards added, mixed shapes, narrow path
+//   Levels 11-15: tighter widths, multiple hazards, boost/slow tiles
+//   Levels 16-20: complex spirals, dense hazard fields
+//   Levels 21-30: master-tier — narrow widths, full mechanic mixes,
+//                 multi-hazard fields, aggressive geometries
+//
+// Past level 30 the engine loops the layouts with stacking lap
+// difficulty (see app/play/tilt-maze.tsx).
 
 export type Point = {
   x: number;
@@ -527,6 +534,247 @@ export const LEVELS: Level[] = [
       { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 18, 4, 0.45), length: 28, kind: 'slow' },
       { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 18, 4, 0.70), length: 28, kind: 'slow' },
       { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 18, 4, 0.85), length: 24, kind: 'boost' },
+    ],
+  },
+
+  // --- LEVEL 21: VERTIGO — tight grid weave with two hazards ---------
+  {
+    name: 'VERTIGO',
+    width: 30,
+    path: [
+      { x: 50, y: 60 },
+      { x: 330, y: 60 },
+      { x: 330, y: 180 },
+      { x: 50, y: 180 },
+      { x: 50, y: 300 },
+      { x: 330, y: 300 },
+      { x: 330, y: 420 },
+      { x: 50, y: 420 },
+      { x: 50, y: 540 },
+      { x: 330, y: 540 },
+      { x: 330, y: 660 },
+      { x: 50, y: 660 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 240 }, armLength: 70, radius: 13, periodMs: 1500 },
+      { pivot: { x: 190, y: 480 }, armLength: 70, radius: 13, periodMs: 1700, phase: 0.5 },
+    ],
+  },
+
+  // --- LEVEL 22: GAUNTLET — long path of alternating tiles ------------
+  {
+    name: 'GAUNTLET',
+    width: 32,
+    path: [
+      { x: 50, y: 70 },
+      { x: 330, y: 70 },
+      { x: 330, y: 200 },
+      { x: 50, y: 200 },
+      { x: 50, y: 330 },
+      { x: 330, y: 330 },
+      { x: 330, y: 460 },
+      { x: 50, y: 460 },
+      { x: 50, y: 590 },
+      { x: 330, y: 590 },
+    ],
+    hazards: [],
+    tiles: [
+      { pos: { x: 200, y: 70 },  length: 80, kind: 'boost' },
+      { pos: { x: 200, y: 200 }, length: 80, kind: 'slow' },
+      { pos: { x: 200, y: 330 }, length: 80, kind: 'boost' },
+      { pos: { x: 200, y: 460 }, length: 80, kind: 'slow' },
+      { pos: { x: 200, y: 590 }, length: 80, kind: 'boost' },
+    ],
+  },
+
+  // --- LEVEL 23: SNAKEBITE — winding snake with three slow tiles -----
+  {
+    name: 'SNAKEBITE',
+    width: 28,
+    path: [
+      { x: 60, y: 80 },
+      { x: 320, y: 80 },
+      { x: 320, y: 220 },
+      { x: 60, y: 220 },
+      { x: 60, y: 360 },
+      { x: 320, y: 360 },
+      { x: 320, y: 500 },
+      { x: 60, y: 500 },
+      { x: 60, y: 640 },
+      { x: 320, y: 640 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 290 }, armLength: 60, radius: 12, periodMs: 1400 },
+      { pivot: { x: 190, y: 570 }, armLength: 60, radius: 12, periodMs: 1600, phase: 0.5 },
+    ],
+    tiles: [
+      { pos: { x: 200, y: 220 }, length: 60, kind: 'slow' },
+      { pos: { x: 200, y: 360 }, length: 60, kind: 'slow' },
+      { pos: { x: 200, y: 500 }, length: 60, kind: 'slow' },
+    ],
+  },
+
+  // --- LEVEL 24: PINBALL — open lane with four offset hazards --------
+  {
+    name: 'PINBALL',
+    width: 38,
+    path: [
+      { x: 60, y: 70 },
+      { x: 60, y: 660 },
+      { x: 320, y: 660 },
+      { x: 320, y: 70 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 160 }, armLength: 110, radius: 14, periodMs: 1500 },
+      { pivot: { x: 190, y: 320 }, armLength: 110, radius: 14, periodMs: 1700, phase: 0.25 },
+      { pivot: { x: 190, y: 480 }, armLength: 110, radius: 14, periodMs: 1900, phase: 0.5 },
+      { pivot: { x: 190, y: 600 }, armLength: 110, radius: 14, periodMs: 2100, phase: 0.75 },
+    ],
+  },
+
+  // --- LEVEL 25: KEYHOLE — wide entry, narrowing dramatically -------
+  {
+    name: 'KEYHOLE',
+    width: 44,
+    path: [
+      { x: 50, y: 90, width: 44 },
+      { x: 330, y: 90, width: 44 },
+      { x: 330, y: 280, width: 36 },
+      { x: 50, y: 280, width: 28 },
+      { x: 50, y: 470, width: 22 },
+      { x: 330, y: 470, width: 22 },
+      { x: 330, y: 660, width: 20 },
+      { x: 50, y: 660, width: 20 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 380 }, armLength: 80, radius: 12, periodMs: 1500 },
+    ],
+    tiles: [
+      { pos: { x: 200, y: 90 },  length: 70, kind: 'boost' },
+      { pos: { x: 200, y: 470 }, length: 60, kind: 'slow' },
+    ],
+  },
+
+  // --- LEVEL 26: TRIPLE — three small spirals chained ----------------
+  {
+    name: 'TRIPLE',
+    width: 30,
+    path: [
+      ...spiral({ center: { x: 110, y: 150 }, startR: 70, endR: 14, turns: 1.25, segments: 36 }),
+      { x: 270, y: 150 },
+      ...spiral({ center: { x: 270, y: 360 }, startR: 14, endR: 70, turns: 1.25, segments: 36, clockwise: false }),
+      { x: 110, y: 580 },
+      ...spiral({ center: { x: 110, y: 580 }, startR: 70, endR: 14, turns: 1.25, segments: 36, startAngle: Math.PI / 2 }),
+    ],
+    hazards: [],
+    tiles: [
+      { pos: { x: 190, y: 150 }, length: 40, kind: 'boost' },
+      { pos: { x: 190, y: 580 }, length: 40, kind: 'boost' },
+    ],
+  },
+
+  // --- LEVEL 27: SLALOM — flowing S-curves with offset hazards -------
+  {
+    name: 'SLALOM',
+    width: 28,
+    path: [
+      { x: 80, y: 60 },
+      { x: 300, y: 160 },
+      { x: 80, y: 260 },
+      { x: 300, y: 360 },
+      { x: 80, y: 460 },
+      { x: 300, y: 560 },
+      { x: 80, y: 660 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 210 }, armLength: 70, radius: 12, periodMs: 1300 },
+      { pivot: { x: 190, y: 410 }, armLength: 70, radius: 12, periodMs: 1500, phase: 0.33 },
+      { pivot: { x: 190, y: 610 }, armLength: 70, radius: 12, periodMs: 1700, phase: 0.66 },
+    ],
+  },
+
+  // --- LEVEL 28: PRESSURE — narrowest yet, fast hazards --------------
+  {
+    name: 'PRESSURE',
+    width: 22,
+    path: [
+      { x: 60, y: 80 },
+      { x: 320, y: 80 },
+      { x: 320, y: 240 },
+      { x: 60, y: 240 },
+      { x: 60, y: 400 },
+      { x: 320, y: 400 },
+      { x: 320, y: 560 },
+      { x: 60, y: 560 },
+      { x: 60, y: 660 },
+      { x: 320, y: 660 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 160 }, armLength: 60, radius: 11, periodMs: 1100 },
+      { pivot: { x: 190, y: 320 }, armLength: 60, radius: 11, periodMs: 1200, phase: 0.5 },
+      { pivot: { x: 190, y: 480 }, armLength: 60, radius: 11, periodMs: 1300 },
+    ],
+    tiles: [
+      { pos: { x: 200, y: 240 }, length: 50, kind: 'slow' },
+      { pos: { x: 200, y: 400 }, length: 50, kind: 'slow' },
+    ],
+  },
+
+  // --- LEVEL 29: BLADE — thin diagonal with dense tile field ---------
+  {
+    name: 'BLADE',
+    width: 24,
+    path: [
+      { x: 60, y: 60 },
+      { x: 320, y: 200 },
+      { x: 60, y: 340 },
+      { x: 320, y: 480 },
+      { x: 60, y: 620 },
+      { x: 320, y: 660 },
+    ],
+    hazards: [
+      { pivot: { x: 190, y: 130 }, armLength: 70, radius: 11, periodMs: 1200 },
+      { pivot: { x: 190, y: 410 }, armLength: 70, radius: 11, periodMs: 1400, phase: 0.5 },
+    ],
+    tiles: [
+      { pos: { x: 200, y: 130 }, length: 40, kind: 'slow' },
+      { pos: { x: 200, y: 270 }, length: 40, kind: 'boost' },
+      { pos: { x: 200, y: 410 }, length: 40, kind: 'slow' },
+      { pos: { x: 200, y: 550 }, length: 40, kind: 'boost' },
+    ],
+  },
+
+  // --- LEVEL 30: APEX — boss level, all mechanics dialed up ----------
+  {
+    name: 'APEX',
+    width: 26,
+    path: spiral({
+      center: { x: CX, y: CY },
+      startR: MAX_SPIRAL_R,
+      endR: 14,
+      turns: 4.5,
+      segments: 160,
+    }).map((p, i, arr) => {
+      const t = i / (arr.length - 1);
+      // Tightens dramatically at the inner third.
+      const w = 32 - t * 14 + Math.sin(t * Math.PI * 6) * 3;
+      return { ...p, width: Math.max(16, w) };
+    }),
+    hazards: [
+      { pivot: { x: CX, y: 50  }, armLength: 130, radius: 12, periodMs: 1100 },
+      { pivot: { x: CX, y: 670 }, armLength: 130, radius: 12, periodMs: 1300, phase: 0.2 },
+      { pivot: { x: 40,  y: CY }, armLength: 120, radius: 12, periodMs: 1500, phase: 0.4 },
+      { pivot: { x: 340, y: CY }, armLength: 120, radius: 12, periodMs: 1700, phase: 0.6 },
+      { pivot: { x: CX, y: CY }, armLength: 60,  radius: 10, periodMs: 900,  phase: 0.8 },
+      { pivot: { x: 100, y: 180 }, armLength: 50,  radius: 10, periodMs: 1200, phase: 0.3 },
+      { pivot: { x: 280, y: 540 }, armLength: 50,  radius: 10, periodMs: 1400, phase: 0.7 },
+    ],
+    tiles: [
+      { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 14, 4.5, 0.10), length: 32, kind: 'boost' },
+      { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 14, 4.5, 0.30), length: 28, kind: 'slow' },
+      { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 14, 4.5, 0.50), length: 28, kind: 'boost' },
+      { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 14, 4.5, 0.72), length: 24, kind: 'slow' },
+      { pos: spiralPointAt({ x: CX, y: CY }, MAX_SPIRAL_R, 14, 4.5, 0.88), length: 22, kind: 'boost' },
     ],
   },
 ];

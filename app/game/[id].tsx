@@ -87,7 +87,6 @@ export default function PreGameScreen() {
       if (game.id === 'tap-bullseye') router.push('/play/tap-bullseye');
       else if (game.id === 'minesweep') router.push('/play/minesweep');
       else if (game.id === 'tilt-maze') router.push('/play/tilt-maze');
-      else if (game.id === 'polaroid') router.push('/play/polaroid');
       else if (game.id === 'walk-the-line') router.push('/play/walk-the-line');
       else if (game.id === 'slipstream') router.push('/play/slipstream');
       else if (game.id === 'dead-air') router.push('/play/dead-air');
@@ -96,6 +95,12 @@ export default function PreGameScreen() {
       else if (game.id === 'pulse') router.push('/play/pulse');
       else if (game.id === 'memory-grid') router.push('/play/memory-grid');
       else if (game.id === 'stroop') router.push('/play/stroop');
+      else if (game.id === 'reaction-light') router.push('/play/reaction-light');
+      else if (game.id === 'spin-360') router.push('/play/spin-360');
+      else if (game.id === 'flip') router.push('/play/flip');
+      else if (game.id === 'shake') router.push('/play/shake');
+      else if (game.id === 'card-shark') router.push('/play/card-shark');
+      else if (game.id === 'vector') router.push('/play/vector');
       else {
         player.refundToken();
         router.replace('/home');
@@ -417,8 +422,6 @@ function randomScore(gameId: string): number {
       return Math.round(180 + Math.random() * 120);
     case 'spin-360':
       return Math.round(Math.random() * 12 * 10) / 10;
-    case 'dead-still':
-      return Math.round(4000 + Math.random() * 5000);
     default:
       return Math.round(5000 + Math.random() * 4999);
   }

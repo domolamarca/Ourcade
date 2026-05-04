@@ -371,9 +371,15 @@ export default function StroopGame() {
           justifyContent: 'center',
         }}
       >
-        <ArcadeText variant="pixel" size={9} color={colors.textMute}>
-          {'TAP THE INK COLOR'}
-        </ArcadeText>
+        {/* Past round 15 the instruction reminder disappears — you
+            have to remember the rule. */}
+        {round <= 15 ? (
+          <ArcadeText variant="pixel" size={9} color={colors.textMute}>
+            {'TAP THE INK COLOR'}
+          </ArcadeText>
+        ) : (
+          <View style={{ height: 16 }} />
+        )}
         <View style={{ height: spacing.lg }} />
         <ArcadeText
           variant="pixel"
@@ -435,23 +441,28 @@ export default function StroopGame() {
                     style={{
                       alignItems: 'center',
                       paddingVertical: spacing.sm,
+                      minHeight: 64, // keep card height stable both modes
+                      justifyContent: 'center',
                     }}
                   >
-                    {/* Color swatch — actual color is on the SWATCH, not
-                        the label, so the player has to click the right
-                        one even if they read the label first. */}
-                    <View
-                      style={{
-                        width: 56,
-                        height: 28,
-                        backgroundColor: opt.hex,
-                        marginBottom: spacing.xs,
-                      }}
-                    />
+                    {/* Round 11+: visual color swatch goes away — the
+                        player can't pattern-match a colored block, they
+                        have to read each label. Bigger Stroop
+                        interference, slower decisions. */}
+                    {round <= 10 ? (
+                      <View
+                        style={{
+                          width: 56,
+                          height: 28,
+                          backgroundColor: opt.hex,
+                          marginBottom: spacing.xs,
+                        }}
+                      />
+                    ) : null}
                     <ArcadeText
                       variant="pixel"
-                      size={10}
-                      color={colors.textDim}
+                      size={round <= 10 ? 10 : 14}
+                      color={round <= 10 ? colors.textDim : colors.text}
                     >
                       {opt.word}
                     </ArcadeText>
@@ -517,10 +528,12 @@ function buildQuestion(): Question {
 }
 
 function timeLimitForRound(round: number): number {
-  if (round <= 5) return 4000;
-  if (round <= 15) return 3500;
-  if (round <= 30) return 3000;
-  return 2500;
+  if (round <= 10) return 4000; // easy mode — full second extra
+  if (round <= 15) return 3500; // text-only buttons era
+  if (round <= 20) return 3000; // instruction-hidden era
+  if (round <= 30) return 2500; // sub-conscious read territory
+  if (round <= 50) return 2000; // expert tier
+  return 1700; // grandmaster — you're playing on instinct
 }
 
 function streakMultiplier(streak: number): number {

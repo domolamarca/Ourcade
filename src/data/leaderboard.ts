@@ -145,12 +145,7 @@ export async function submitScore(args: {
 // ----- Sync getters (UI reads from cache) -----------------------------
 
 export function isLowerBetter(gameId: string): boolean {
-  return (
-    gameId === 'reaction-light' ||
-    gameId === 'spin-360' ||
-    gameId === 'silence' ||
-    gameId === 'true-north'
-  );
+  return gameId === 'reaction-light' || gameId === 'spin-360';
 }
 
 export function getTopScores(

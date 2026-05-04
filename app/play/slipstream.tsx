@@ -897,7 +897,7 @@ export default function SlipstreamGame() {
                 glowColor={ACCENT}
                 align="center"
               >
-                {'SLIPSTREAM'}
+                {'BOUNCE'}
               </ArcadeText>
               <View style={{ height: spacing.md }} />
               <ArcadeText variant="mono" size={16} color={colors.textDim} align="center">

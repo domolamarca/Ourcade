@@ -27,7 +27,14 @@ export default function HomeScreen() {
   const player = usePlayer();
   const dailyId = getDailyCabinetId();
   const dailyGame = getGame(dailyId);
-  const otherGames = games.filter((g) => g.id !== dailyId);
+  // Order shuffles every UTC day so different cabinets surface at the top
+  // each morning. Same seed as the daily challenge → both rotate together.
+  // `hidden` cabinets are benched between weekly content drops — they
+  // never appear in the lobby but their code/leaderboard data are intact.
+  const otherGames = dailyShuffle(
+    games.filter((g) => g.id !== dailyId && !g.hidden),
+    todaysShuffleSeed(),
+  );
 
   // Live-updating reset clock. Re-renders every minute — cheap.
   const [resetMs, setResetMs] = useState(() => msUntilNextUtcMidnight());
@@ -153,8 +160,8 @@ export default function HomeScreen() {
         ) : null}
 
         {/* 2-per-row grid that exactly matches the daily card width.
-            Pairs of cards live in a flex row with spacing.md gap between
-            and flex:1 each, so two cards + gap == one daily card width. */}
+            Cabinets are mixed across skills — header color tells you the
+            genre. Order rotates daily (see `dailyShuffle`). */}
         {chunkPairs(otherGames).map((pair, idx) => (
           <View
             key={idx}
@@ -203,6 +210,38 @@ function chunkPairs<T>(arr: T[]): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += 2) {
     out.push(arr.slice(i, i + 2));
+  }
+  return out;
+}
+
+// ---- Daily-rotating cabinet order --------------------------------------
+//
+// Goal: every day the cabinet placement reshuffles so different cabinets
+// catch the eye at the top of the lobby. The shuffle is deterministic
+// from the UTC day index, so all players in a given UTC day see the
+// same order — important because that's also when the daily challenge
+// rotates.
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+/** UTC day index — same seed source as `getDailyCabinetId`. */
+function todaysShuffleSeed(now: number = Date.now()): number {
+  return Math.floor(now / ONE_DAY_MS);
+}
+
+/** Mulberry32-seeded Fisher-Yates. Pure; never mutates input. */
+function dailyShuffle<T>(items: T[], seed: number): T[] {
+  const out = items.slice();
+  let s = seed >>> 0;
+  for (let i = out.length - 1; i > 0; i--) {
+    // Mulberry32 step
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    const r = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    const j = Math.floor(r * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
   }
   return out;
 }

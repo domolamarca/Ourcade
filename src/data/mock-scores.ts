@@ -42,16 +42,6 @@ export const MOCK_SCORES: Score[] = [
   { id: '60', initials: 'NUB', gameId: 'minesweep', score: 20000 - 167,  unit: 'LV', level: 2, taps: 167,  date: '2026-04-25' },
   { id: '61', initials: 'AGE', gameId: 'minesweep', score: 10000 - 38,   unit: 'LV', level: 1, taps: 38,   date: '2026-04-19' },
 
-  // Polaroid
-  { id: '90', initials: 'KAT', gameId: 'polaroid', score: 9420, unit: 'PTS', date: '2026-04-26' },
-  { id: '91', initials: 'NOX', gameId: 'polaroid', score: 8870, unit: 'PTS', date: '2026-04-25' },
-  { id: '92', initials: 'ZIP', gameId: 'polaroid', score: 8210, unit: 'PTS', date: '2026-04-24' },
-  { id: '93', initials: 'DOM', gameId: 'polaroid', score: 7340, unit: 'PTS', date: '2026-04-26' },
-  { id: '94', initials: 'BLZ', gameId: 'polaroid', score: 6920, unit: 'PTS', date: '2026-04-23' },
-  { id: '95', initials: 'ZEN', gameId: 'polaroid', score: 6180, unit: 'PTS', date: '2026-04-22' },
-  { id: '96', initials: 'AAA', gameId: 'polaroid', score: 5440, unit: 'PTS', date: '2026-04-21' },
-  { id: '97', initials: 'NUB', gameId: 'polaroid', score: 3820, unit: 'PTS', date: '2026-04-20' },
-
   // Trivia
   { id: '140', initials: 'KAT', gameId: 'trivia', score: 9420, unit: 'PTS', date: '2026-04-26' },
   { id: '141', initials: 'NOX', gameId: 'trivia', score: 8870, unit: 'PTS', date: '2026-04-25' },
@@ -135,15 +125,47 @@ export const MOCK_SCORES: Score[] = [
   { id: '88', initials: 'TUR', gameId: 'tilt-maze', score: 2_000_000  - 33_500,  unit: 'LV', level: 2,  taps: 33_500,  date: '2026-04-26' },
   { id: '89', initials: 'NUB', gameId: 'tilt-maze', score: 1_000_000  - 18_600,  unit: 'LV', level: 1,  taps: 18_600,  date: '2026-04-19' },
 
-  // Dead Still
-  { id: '201', initials: 'ZEN', gameId: 'dead-still', score: 9421, unit: 'PTS', date: '2026-04-26' },
-  { id: '202', initials: 'STN', gameId: 'dead-still', score: 8804, unit: 'PTS', date: '2026-04-23' },
-  { id: '203', initials: 'DOM', gameId: 'dead-still', score: 7250, unit: 'PTS', date: '2026-04-26' },
-
   // 360 Spin — lower is better
   { id: '301', initials: 'TRN', gameId: 'spin-360', score: 1.2, unit: '°', date: '2026-04-25' },
   { id: '302', initials: 'AXE', gameId: 'spin-360', score: 2.7, unit: '°', date: '2026-04-24' },
   { id: '303', initials: 'DOM', gameId: 'spin-360', score: 5.3, unit: '°', date: '2026-04-26' },
+
+  // Vector — endless tunnel survival score (time + blast combos).
+  // Top-tier players push 8k+; casual ~1k.
+  { id: '430', initials: 'KAT', gameId: 'vector', score: 12480, unit: 'PTS', date: '2026-04-26' },
+  { id: '431', initials: 'NOX', gameId: 'vector', score:  9320, unit: 'PTS', date: '2026-04-25' },
+  { id: '432', initials: 'ZIP', gameId: 'vector', score:  6890, unit: 'PTS', date: '2026-04-24' },
+  { id: '433', initials: 'DOM', gameId: 'vector', score:  4720, unit: 'PTS', date: '2026-04-26' },
+  { id: '434', initials: 'BLZ', gameId: 'vector', score:  3140, unit: 'PTS', date: '2026-04-23' },
+  { id: '435', initials: 'AAA', gameId: 'vector', score:  1280, unit: 'PTS', date: '2026-04-21' },
+
+  // Flip — total degrees rotated in 5s.
+  // Casual single-flip ~360°. A determined wrist-spinner can hit 2000°+
+  // in 5 seconds. Top scores show off clean multi-axis rotation.
+  { id: '401', initials: 'KAT', gameId: 'flip', score: 2840, unit: '°', date: '2026-04-26' },
+  { id: '402', initials: 'NOX', gameId: 'flip', score: 2210, unit: '°', date: '2026-04-25' },
+  { id: '403', initials: 'ZIP', gameId: 'flip', score: 1740, unit: '°', date: '2026-04-24' },
+  { id: '404', initials: 'DOM', gameId: 'flip', score: 1180, unit: '°', date: '2026-04-26' },
+  { id: '405', initials: 'BLZ', gameId: 'flip', score: 840,  unit: '°', date: '2026-04-23' },
+  { id: '406', initials: 'AAA', gameId: 'flip', score: 420,  unit: '°', date: '2026-04-21' },
+
+  // Shake Meter — sum of (|a|-1g)² across 10s of samples (~50Hz).
+  // Calibration: leisurely shake ~3000, vigorous ~12000, manic ~25000+.
+  { id: '410', initials: 'KAT', gameId: 'shake', score: 28640, unit: 'PTS', date: '2026-04-26' },
+  { id: '411', initials: 'NOX', gameId: 'shake', score: 22180, unit: 'PTS', date: '2026-04-25' },
+  { id: '412', initials: 'ZIP', gameId: 'shake', score: 17420, unit: 'PTS', date: '2026-04-24' },
+  { id: '413', initials: 'DOM', gameId: 'shake', score: 12340, unit: 'PTS', date: '2026-04-26' },
+  { id: '414', initials: 'BLZ', gameId: 'shake', score: 8210,  unit: 'PTS', date: '2026-04-23' },
+  { id: '415', initials: 'AAA', gameId: 'shake', score: 3640,  unit: 'PTS', date: '2026-04-21' },
+
+  // Card Shark — 3 strikes ends the run; per-round 100 + speed × streak.
+  // Top-tier: 80+ correct rounds, ~25k+ score.
+  { id: '420', initials: 'KAT', gameId: 'card-shark', score: 27880, unit: 'PTS', date: '2026-04-26' },
+  { id: '421', initials: 'NOX', gameId: 'card-shark', score: 21340, unit: 'PTS', date: '2026-04-25' },
+  { id: '422', initials: 'ZIP', gameId: 'card-shark', score: 16210, unit: 'PTS', date: '2026-04-24' },
+  { id: '423', initials: 'DOM', gameId: 'card-shark', score: 11480, unit: 'PTS', date: '2026-04-26' },
+  { id: '424', initials: 'BLZ', gameId: 'card-shark', score: 7320,  unit: 'PTS', date: '2026-04-23' },
+  { id: '425', initials: 'AAA', gameId: 'card-shark', score: 2840,  unit: 'PTS', date: '2026-04-21' },
 ];
 
 export const PLAYER_INITIALS = 'DOM';

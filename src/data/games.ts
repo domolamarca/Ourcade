@@ -18,6 +18,34 @@ export type SensorTag =
 
 export type GameCategory = 'TOUCH' | 'MOTION' | 'AUDIO' | 'COMPASS' | 'LOCATION' | 'COMBO';
 
+/**
+ * Skill bucket — used to group cabinets in the lobby. Independent of
+ * the sensor `category` above so we can rearrange the floor without
+ * disturbing per-game routing or icon mappings.
+ */
+export type SkillCategory = 'REACTION' | 'MEMORY' | 'CONCENTRATION' | 'CHAOS';
+
+export const SKILL_LABELS: Record<SkillCategory, string> = {
+  REACTION: 'REACTION',
+  MEMORY: 'MEMORY',
+  CONCENTRATION: 'CONCENTRATION',
+  CHAOS: 'CHAOS',
+};
+
+export const SKILL_COLORS: Record<SkillCategory, NeonColor> = {
+  REACTION: 'red',
+  MEMORY: 'purple',
+  CONCENTRATION: 'green',
+  CHAOS: 'yellow',
+};
+
+export const SKILL_ORDER: SkillCategory[] = [
+  'REACTION',
+  'MEMORY',
+  'CONCENTRATION',
+  'CHAOS',
+];
+
 export type Game = {
   id: string;
   name: string;
@@ -27,10 +55,16 @@ export type Game = {
   rules: string[]; // bullet list shown before PRESS START
   sensors: SensorTag[];
   category: GameCategory;
+  /** Lobby skill bucket — groups cabinets in the home screen. */
+  skill: SkillCategory;
   iconText: string; // glyph standing in for sprite art
   unit: string; // 'PTS' | 'MS' | 'dB' | '°' | 'M'
   scoreLabel: string; // 'BEST' | 'FASTEST' | 'CLOSEST' etc.
   status: 'live' | 'soon';
+  /** When true, the cabinet is built and works but stays out of the
+   * lobby + daily-challenge rotation. Used to bench cabinets between
+   * weekly content drops without deleting code or leaderboard data. */
+  hidden?: boolean;
   accentColor: NeonColor;
   // Higher score = better? Most arcade games yes; reaction-time games no.
   higherIsBetter: boolean;
@@ -44,6 +78,7 @@ export type Game = {
 export const games: Game[] = [
   {
     id: 'tap-bullseye',
+    skill: 'REACTION',
     name: 'TAP BULLSEYE',
     shortName: 'BULLSEYE',
     tagline: 'Survive the spawn. One miss ends it.',
@@ -66,6 +101,7 @@ export const games: Game[] = [
   },
   {
     id: 'minesweep',
+    skill: 'CONCENTRATION',
     name: 'MINESWEEP',
     shortName: 'SWEEP',
     tagline: 'Read the chaos. Wipe colors clean.',
@@ -95,17 +131,18 @@ export const games: Game[] = [
   },
   {
     id: 'tilt-maze',
+    skill: 'CONCENTRATION',
     name: 'TILT MAZE',
     shortName: 'MAZE',
     tagline: 'Roll the ball through. Don\'t fall off.',
     description:
-      'Tilt your phone to roll a ball through a winding path. Levels get narrower, twistier, spiral, and eventually start swinging hazards at you. After level 20 the path loops with stacking lap difficulty (faster ball, faster hazards). Haptic warns near the edge. One slip ends the run.',
+      'Tilt your phone to roll a ball through a winding path. 30 hand-tuned levels — narrower, twistier, spirals, eventually swinging hazards. Past level 30 the layouts loop with stacking lap difficulty (faster ball, faster hazards). Haptic warns near the edge. One slip ends the run.',
     rules: [
       'Tilt the phone to apply gravity to the ball',
       'Stay on the glowing path',
       'Edge proximity triggers haptic warning',
       'Falling off OR hitting a hazard = game over',
-      'Loops after level 20 with +difficulty — climb forever',
+      '30 levels then loops with +difficulty — climb forever',
     ],
     sensors: ['ACCEL'],
     category: 'MOTION',
@@ -125,29 +162,9 @@ export const games: Game[] = [
     },
   },
   {
-    id: 'polaroid',
-    name: 'POLAROID',
-    shortName: 'POLA',
-    tagline: 'Snap. Memorize. Spot the change.',
-    description:
-      'Take a photo. Memorize it. The game shows it back with one thing changed. Tap the change as fast as you can. Five rounds, every photo is yours, no two runs alike.',
-    rules: [
-      'TAP TO SHOOT — your camera, your photos',
-      'Memorize phase: 2 seconds with the original',
-      'Reveal phase: tap exactly where the change is',
-      'Score = speed + accuracy across 5 rounds',
-    ],
-    sensors: ['CAM', 'TOUCH'],
-    category: 'TOUCH',
-    iconText: '◻',
-    unit: 'PTS',
-    scoreLabel: 'BEST',
-    status: 'live',
-    accentColor: 'cyan',
-    higherIsBetter: true,
-  },
-  {
     id: 'walk-the-line',
+    skill: 'CONCENTRATION',
+    hidden: true, // benched for launch — returns as a content-drop cabinet
     name: 'WALK THE LINE',
     shortName: 'WALK',
     tagline: 'Trust your inner compass.',
@@ -171,8 +188,9 @@ export const games: Game[] = [
   },
   {
     id: 'slipstream',
-    name: 'SLIPSTREAM',
-    shortName: 'STREAM',
+    skill: 'CHAOS',
+    name: 'BOUNCE',
+    shortName: 'BOUNCE',
     tagline: 'Thread the neon. Dodge the bombs.',
     description:
       'Glow-bug through neon corridors. Tap to flap, tilt to drift. Tall walls have 1–3 holes (some moving), orange short bars bob between them, cyan tunnels force altitude commits, and red bombs turn the arcade lethal. Mine fields appear in the deep run. Hit anything — wall, bomb, top/bottom border — and the run ends.',
@@ -195,6 +213,7 @@ export const games: Game[] = [
   },
   {
     id: 'dead-air',
+    skill: 'CONCENTRATION',
     name: 'DEAD AIR',
     shortName: 'DEAD AIR',
     tagline: 'Be still. Be silent. As long as you can.',
@@ -219,6 +238,7 @@ export const games: Game[] = [
   },
   {
     id: 'trivia',
+    skill: 'MEMORY',
     name: 'TRIVIA',
     shortName: 'TRIVIA',
     tagline: 'Three strikes. Endless questions.',
@@ -242,6 +262,7 @@ export const games: Game[] = [
   },
   {
     id: 'draw-it',
+    skill: 'CONCENTRATION',
     name: 'DRAW IT',
     shortName: 'DRAW',
     tagline: 'Sketch from memory. Forever.',
@@ -265,6 +286,7 @@ export const games: Game[] = [
   },
   {
     id: 'memory-grid',
+    skill: 'MEMORY',
     name: 'MEMORY GRID',
     shortName: 'MEMORY',
     tagline: 'Watch the flash. Tap it back.',
@@ -288,17 +310,18 @@ export const games: Game[] = [
   },
   {
     id: 'stroop',
-    name: 'STROOP RUSH',
-    shortName: 'STROOP',
+    skill: 'REACTION',
+    name: 'COLORZ',
+    shortName: 'COLORZ',
     tagline: 'Read the color. Ignore the word.',
     description:
-      'A color word is shown in a different ink color. Tap the INK color, not the word. Three strikes ends the run. Question time tightens as you go. Speed bonus + streak multiplier reward fast, accurate calls.',
+      'A color word is shown in a different ink color. Tap the INK color, not the word. Tiered escalation: round 11 the swatches disappear (read the labels), round 16 the instruction hint vanishes (remember the rule), round 21+ the timer keeps tightening. Three strikes ends the run, but rounds are infinite — climb until you slip.',
     rules: [
       'Tap the INK color (not the word)',
-      'Speed bonus per fast correct answer',
-      'Streaks unlock x2 / x3 / x4 multipliers',
+      'Round 11+: swatches gone, word labels only',
+      'Round 16+: instruction hint hidden — remember the rule',
+      'Round 21+ → 31+ → 51+: progressively shorter timer',
       '3 strikes (wrong or timeout) ends the run',
-      'Question time tightens as you progress',
     ],
     sensors: ['TOUCH'],
     category: 'TOUCH',
@@ -311,6 +334,7 @@ export const games: Game[] = [
   },
   {
     id: 'pulse',
+    skill: 'REACTION',
     name: 'PULSE',
     shortName: 'PULSE',
     tagline: 'Tap the falling tiles. Don\'t miss.',
@@ -333,16 +357,114 @@ export const games: Game[] = [
     higherIsBetter: true,
   },
   {
+    id: 'vector',
+    skill: 'CHAOS',
+    name: 'VECTOR',
+    shortName: 'VECTOR',
+    tagline: 'Tilt to dodge. Tap to blast.',
+    description:
+      'Your ship flies toward a vanishing point. Asteroids race out of it straight at you. Tilt to slide, tap to fire. Bullets only kill in the near field. Threat ladder unlocks: CURVING at 20s, BIG at 25s, CLUSTERS at 35s, MINES at 50s. Power-up capsules drop into the lane occasionally — touch with your ship for SPREAD shot or RAPID fire. 3 lives, no cap.',
+    rules: [
+      'TILT phone to slide · TAP to fire',
+      'Bullets only kill in the near zone — wait for the rock to drop',
+      'CURVING (20s+) · BIG (25s+) · CLUSTERS (35s+) · MINES (50s+)',
+      'Power-up capsules: cyan = SPREAD, yellow = RAPID (5s each)',
+      '3 lives, infinite rounds — leaderboard stays open',
+    ],
+    sensors: ['ACCEL', 'TOUCH'],
+    category: 'COMBO',
+    iconText: '∆',
+    unit: 'PTS',
+    scoreLabel: 'BEST',
+    status: 'live',
+    accentColor: 'cyan',
+    higherIsBetter: true,
+  },
+  {
+    id: 'flip',
+    skill: 'CHAOS',
+    name: 'FLIP',
+    shortName: 'FLIP',
+    tagline: 'Rotate as much as you can in 5 seconds.',
+    description:
+      'A 5-second rotation challenge. Flip, spin, or roll the phone in your hand — every degree counts. Score = total integrated rotation magnitude across all axes. No throwing required; this is wrist-and-grip skill.',
+    rules: [
+      'Tap to start — 5-second window',
+      'Flip / spin / roll the phone any way you like',
+      'Score = total degrees of rotation (sum of |gyro|·dt)',
+      'Smoother + faster rotation scores higher',
+    ],
+    sensors: ['GYRO'],
+    category: 'MOTION',
+    iconText: '↻',
+    unit: '°',
+    scoreLabel: 'BEST',
+    status: 'live',
+    accentColor: 'red',
+    higherIsBetter: true,
+  },
+  {
+    id: 'shake',
+    skill: 'CHAOS',
+    name: 'SHAKE METER',
+    shortName: 'SHAKE',
+    tagline: 'Shake harder. Shake longer.',
+    description:
+      'Shake the phone as vigorously as possible for 10 seconds. Score is integrated shake energy from the accelerometer. A live intensity meter shows how hard you\'re going. Higher beats lower.',
+    rules: [
+      '10-second window — shake non-stop',
+      'Score = integrated (|a| - 1g)² × time',
+      'Live meter shows current intensity',
+      'Cardio. Wear a wrist strap if you got one',
+    ],
+    sensors: ['ACCEL'],
+    category: 'MOTION',
+    iconText: '~',
+    unit: 'PTS',
+    scoreLabel: 'BEST',
+    status: 'live',
+    accentColor: 'orange',
+    higherIsBetter: true,
+  },
+  {
+    id: 'card-shark',
+    skill: 'MEMORY',
+    name: 'CARD SHARK',
+    shortName: 'SHARK',
+    tagline: 'Find the queen. Three-card monte.',
+    description:
+      'Three card backs. The queen flashes for a moment, then they shuffle. Tap the queen when the cards stop. Right = points + speed bonus + streak multiplier. Wrong = strike. Three strikes ends the run, but rounds are infinite — climb forever. Round 11 adds a 4th card. Round 16 adds DECOY FLIPS — fake queens flash mid-shuffle to wreck your tracking.',
+    rules: [
+      'Watch the queen reveal',
+      'Track the shuffle — speed climbs every round',
+      'Round 6+: faster ramp (more swaps, less time)',
+      'Round 11+: 4th card joins the row',
+      'Round 16+: DECOY flashes mid-shuffle — fake queens',
+      '3 strikes ends the run',
+    ],
+    sensors: ['TOUCH'],
+    category: 'TOUCH',
+    iconText: '♠',
+    unit: 'PTS',
+    scoreLabel: 'BEST',
+    status: 'live',
+    accentColor: 'green',
+    higherIsBetter: true,
+  },
+  {
     id: 'reaction-light',
+    skill: 'REACTION',
     name: 'REACTION LIGHT',
     shortName: 'REACT',
     tagline: 'Wait for green. Tap. Pure milliseconds.',
     description:
-      'The screen sits red. After a random delay it flips green. Tap as fast as you can. Tap during red and you bust.',
+      'The screen sits red. After a random delay it flips green. Tap as fast as you can. Tap during red and you bust. Round 6+ adds distractor flashes — pink, orange, yellow — that aren\'t green but love to fake out your finger.',
     rules: [
       'Hold still. Tap the moment it turns green',
       'Tap during red = disqualified',
-      'Average of 5 rounds is your score',
+      'Round 6+: pink / orange / yellow distractors flash — DON\'T tap',
+      'Distractor taps are neutral but slow you down for green',
+      'Average of 10 rounds is your score',
     ],
     sensors: ['TOUCH'],
     category: 'TOUCH',
@@ -354,28 +476,9 @@ export const games: Game[] = [
     higherIsBetter: false,
   },
   {
-    id: 'dead-still',
-    name: 'DEAD STILL',
-    shortName: 'STILL',
-    tagline: 'Hold the phone perfectly still.',
-    description:
-      'Lower jitter = higher score. Sneeze, breathe wrong, get bumped — your score craters. Ten seconds of true zen.',
-    rules: [
-      'Hold the phone in any orientation',
-      'Score = 10000 / accumulated jitter',
-      'Ten seconds. No do-overs',
-    ],
-    sensors: ['ACCEL', 'GYRO'],
-    category: 'MOTION',
-    iconText: '⊡',
-    unit: 'PTS',
-    scoreLabel: 'STEADIEST',
-    status: 'live',
-    accentColor: 'cyan',
-    higherIsBetter: true,
-  },
-  {
     id: 'spin-360',
+    skill: 'CHAOS',
+    hidden: true, // benched for launch — returns as a content-drop cabinet
     name: '360 SPIN',
     shortName: 'SPIN',
     tagline: 'Rotate exactly one full turn.',
@@ -394,90 +497,6 @@ export const games: Game[] = [
     status: 'live',
     accentColor: 'yellow',
     higherIsBetter: false,
-  },
-  {
-    id: 'silence',
-    name: 'SILENCE',
-    shortName: 'QUIET',
-    tagline: 'Make your room as silent as possible.',
-    description:
-      'We sample microphone dB for 30 seconds. Lowest sustained reading wins. Try this in NYC, we dare you.',
-    rules: [
-      'Mic permission required',
-      '30 seconds of recording',
-      'Score = average dB over the run',
-    ],
-    sensors: ['MIC'],
-    category: 'AUDIO',
-    iconText: '◔',
-    unit: 'dB',
-    scoreLabel: 'QUIETEST',
-    status: 'soon',
-    accentColor: 'purple',
-    higherIsBetter: false,
-  },
-  {
-    id: 'true-north',
-    name: 'TRUE NORTH',
-    shortName: 'NORTH',
-    tagline: 'Point the phone exactly north.',
-    description:
-      'Compass mode. Aim the top of the device at magnetic north as accurately as you can. We snapshot when you tap LOCK.',
-    rules: [
-      'Compass calibration matters — wave the phone in a figure-8 first',
-      'Tap LOCK when you think you have it',
-      'Score = degrees off true north',
-    ],
-    sensors: ['MAG'],
-    category: 'COMPASS',
-    iconText: '◈',
-    unit: '°',
-    scoreLabel: 'CLOSEST',
-    status: 'soon',
-    accentColor: 'orange',
-    higherIsBetter: false,
-  },
-  {
-    id: 'high-rise',
-    name: 'HIGH RISE',
-    shortName: 'CLIMB',
-    tagline: 'Find the highest building near you.',
-    description:
-      'Localized leaderboard. Use the barometer to record the highest elevation gain in your city in a single session. Daily reset.',
-    rules: [
-      'Barometer required (iPhone 6 and later)',
-      'Localized to your city — separate leaderboard',
-      'Score = peak elevation above your start point',
-    ],
-    sensors: ['BARO', 'GPS'],
-    category: 'LOCATION',
-    iconText: '↟',
-    unit: 'M',
-    scoreLabel: 'HIGHEST',
-    status: 'soon',
-    accentColor: 'blue',
-    higherIsBetter: true,
-  },
-  {
-    id: 'tap-and-still',
-    name: 'TAP & STILL',
-    shortName: 'COMBO',
-    tagline: 'Fastest tap with the least phone motion.',
-    description:
-      'Tie-breaker mode. Tap the target as fast as possible while keeping the phone perfectly still. Combined score across both.',
-    rules: [
-      'Touch + accelerometer scored together',
-      'Movement penalty multiplies your time',
-      'Used for tie-break in tournaments',
-    ],
-    sensors: ['TOUCH', 'ACCEL'],
-    category: 'COMBO',
-    iconText: '✦',
-    unit: 'PTS',
-    scoreLabel: 'BEST',
-    status: 'soon',
-    accentColor: 'red',
-    higherIsBetter: true,
   },
 ];
 

@@ -72,10 +72,6 @@ export default function RootLayout() {
           options={{ presentation: 'card', gestureEnabled: false }}
         />
         <Stack.Screen
-          name="play/polaroid"
-          options={{ presentation: 'card', gestureEnabled: false }}
-        />
-        <Stack.Screen
           name="play/walk-the-line"
           options={{ presentation: 'card', gestureEnabled: false }}
         />
@@ -105,6 +101,30 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="play/stroop"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/reaction-light"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/spin-360"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/flip"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/shake"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/card-shark"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/vector"
           options={{ presentation: 'card', gestureEnabled: false }}
         />
         <Stack.Screen name="result/[id]" options={{ presentation: 'card' }} />

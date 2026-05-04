@@ -128,7 +128,6 @@ export default function ResultScreen() {
     if (game.id === 'tap-bullseye') router.replace('/play/tap-bullseye');
     else if (game.id === 'minesweep') router.replace('/play/minesweep');
     else if (game.id === 'tilt-maze') router.replace('/play/tilt-maze');
-    else if (game.id === 'polaroid') router.replace('/play/polaroid');
     else if (game.id === 'walk-the-line') router.replace('/play/walk-the-line');
     else if (game.id === 'slipstream') router.replace('/play/slipstream');
     else if (game.id === 'dead-air') router.replace('/play/dead-air');
@@ -137,6 +136,12 @@ export default function ResultScreen() {
     else if (game.id === 'pulse') router.replace('/play/pulse');
     else if (game.id === 'memory-grid') router.replace('/play/memory-grid');
     else if (game.id === 'stroop') router.replace('/play/stroop');
+    else if (game.id === 'reaction-light') router.replace('/play/reaction-light');
+    else if (game.id === 'spin-360') router.replace('/play/spin-360');
+    else if (game.id === 'flip') router.replace('/play/flip');
+    else if (game.id === 'shake') router.replace('/play/shake');
+    else if (game.id === 'card-shark') router.replace('/play/card-shark');
+    else if (game.id === 'vector') router.replace('/play/vector');
     else router.replace({ pathname: '/game/[id]', params: { id: game.id } });
   };
 

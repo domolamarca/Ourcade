@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
-import { Game } from '../data/games';
+import { Game, SKILL_COLORS } from '../data/games';
 import { colors, neon, spacing } from '../theme';
 import { ArcadeText } from './ArcadeText';
 import { GameIcon } from './GameIcon';
@@ -40,6 +40,11 @@ export function GameCabinetCard({
   variant = 'standard',
 }: Props) {
   const accent = neon(game.accentColor);
+  // Skill color codes the cabinet's genre — frame border + marquee header
+  // share it so a glance across the lobby reads as "what kind of game is
+  // this?" without text labels. The accent color still drives the glyph
+  // and rank glow so each cabinet keeps its individual personality.
+  const skillColor = neon(SKILL_COLORS[game.skill]);
   const isLocked = game.status !== 'live';
   const wide = variant === 'wide';
 
@@ -57,16 +62,17 @@ export function GameCabinetCard({
       })}
     >
       <NeonFrame
-        color={freeToday ? neon('green') : accent}
+        color={freeToday ? neon('green') : skillColor}
         thickness={2}
         padding={0}
         fill={colors.bgSurface}
         glow={freeToday}
       >
-        {/* Cabinet "marquee" header */}
+        {/* Cabinet "marquee" header — colored by skill bucket so the
+            lobby reads as a mosaic of game types at a glance. */}
         <View
           style={{
-            backgroundColor: freeToday ? neon('green') : accent,
+            backgroundColor: freeToday ? neon('green') : skillColor,
             paddingVertical: spacing.xs,
             paddingHorizontal: spacing.sm,
             flexDirection: 'row',

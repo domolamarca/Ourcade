@@ -50,13 +50,6 @@ function renderShape(id: string, color: string) {
           <Circle cx="12" cy="12" r="3" fill="#08080f" />
         </>
       );
-    case 'dead-still':
-      return (
-        <>
-          <Rect x="3" y="3" width="26" height="26" stroke={color} strokeWidth="2" fill="none" />
-          <Rect x="11" y="11" width="10" height="10" fill={color} />
-        </>
-      );
     case 'spin-360':
       return (
         <>
@@ -69,39 +62,81 @@ function renderShape(id: string, color: string) {
           <Polygon points="20,3 22,9 14,9" fill={color} />
         </>
       );
-    case 'silence':
+    case 'vector':
+      // Vanishing-point perspective: triangular ship at the bottom,
+      // chevrons receding toward a glowing point at top.
       return (
         <>
-          <Polygon points="4,12 11,12 18,5 18,27 11,20 4,20" fill={color} />
-          <Line x1="22" y1="9" x2="29" y2="23" stroke={color} strokeWidth="3" />
-          <Line x1="29" y1="9" x2="22" y2="23" stroke={color} strokeWidth="3" />
+          {/* Vanishing point glow */}
+          <Circle cx="16" cy="6" r="3" fill={color} />
+          <Circle cx="16" cy="6" r="6" fill={color} fillOpacity={0.3} />
+          {/* Receding lane chevrons */}
+          <Polygon points="13,12 16,9 19,12" stroke={color} strokeWidth="1" fill="none" />
+          <Polygon points="11,18 16,13 21,18" stroke={color} strokeWidth="1" fill="none" />
+          <Polygon points="9,24 16,17 23,24" stroke={color} strokeWidth="1" fill="none" />
+          {/* Ship triangle at the bottom */}
+          <Polygon points="16,21 11,29 21,29" fill={color} />
         </>
       );
-    case 'true-north':
+    case 'flip':
+      // Phone rotating end-over-end — show two phones at different
+      // rotations connected by a curved arrow.
       return (
         <>
-          <Polygon points="16,3 22,18 16,15 10,18" fill={color} />
-          <Polygon
-            points="16,29 22,18 16,21 10,18"
+          {/* Rotation arc */}
+          <Path
+            d="M 7 22 A 9 9 0 0 1 25 22"
             stroke={color}
-            strokeWidth="2"
+            strokeWidth="1.5"
+            strokeOpacity={0.6}
             fill="none"
+          />
+          <Polygon points="25,22 23,17 27,18" fill={color} />
+          {/* Phone, upright */}
+          <Rect x="6" y="20" width="6" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          {/* Phone, rotated mid-flip */}
+          <Rect
+            x="20"
+            y="4"
+            width="6"
+            height="8"
+            stroke={color}
+            strokeWidth="1.5"
+            fill={color}
+            fillOpacity={0.5}
+            transform="rotate(70, 23, 8)"
           />
         </>
       );
-    case 'high-rise':
+    case 'shake':
+      // Phone with motion lines on either side — shaking left/right.
       return (
         <>
-          <Polygon points="16,3 28,29 4,29" stroke={color} strokeWidth="2" fill="none" />
-          <Line x1="16" y1="11" x2="16" y2="29" stroke={color} strokeWidth="2" />
-          <Line x1="10" y1="22" x2="22" y2="22" stroke={color} strokeWidth="2" />
+          <Rect x="11" y="6" width="10" height="20" stroke={color} strokeWidth="1.5" fill={color} fillOpacity={0.4} />
+          <Line x1="3" y1="11" x2="7" y2="11" stroke={color} strokeWidth="2" />
+          <Line x1="3" y1="16" x2="6" y2="16" stroke={color} strokeWidth="2" />
+          <Line x1="3" y1="21" x2="7" y2="21" stroke={color} strokeWidth="2" />
+          <Line x1="25" y1="11" x2="29" y2="11" stroke={color} strokeWidth="2" />
+          <Line x1="26" y1="16" x2="29" y2="16" stroke={color} strokeWidth="2" />
+          <Line x1="25" y1="21" x2="29" y2="21" stroke={color} strokeWidth="2" />
         </>
       );
-    case 'tap-and-still':
+    case 'card-shark':
+      // Three card backs, one with a question mark on it.
       return (
         <>
-          <Rect x="3" y="3" width="20" height="20" stroke={color} strokeWidth="2" fill="none" />
-          <Circle cx="22" cy="22" r="8" fill={color} fillOpacity={0.85} />
+          <Rect x="3" y="6" width="8" height="20" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="12" y="6" width="8" height="20" fill={color} />
+          <Rect x="21" y="6" width="8" height="20" stroke={color} strokeWidth="1.5" fill="none" />
+          {/* Question mark on the middle (queen) card */}
+          <Path
+            d="M 14 12 Q 14 10 16 10 T 18 12 Q 18 14 16 15 L 16 16"
+            stroke="#08080f"
+            strokeWidth="1.5"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <Circle cx="16" cy="20" r="0.9" fill="#08080f" />
         </>
       );
     case 'trivia':
@@ -114,11 +149,19 @@ function renderShape(id: string, color: string) {
         </>
       );
     case 'draw-it':
-      // Pencil drawing a curve.
+      // Star being drawn freehand — geometric (not a curve) so it
+      // doesn't collide with tilt-maze's winding path. Bright dot at
+      // the apex marks the "pencil tip" mid-stroke.
       return (
         <>
-          <Path d="M 5 22 Q 12 8 19 12 T 27 8" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <Path d="M 22 6 L 27 11 L 25 13 L 20 8 Z" fill={color} />
+          <Polygon
+            points="16,4 19.5,13 29,13.5 21.5,19.5 24,28.5 16,23.5 8,28.5 10.5,19.5 3,13.5 12.5,13"
+            stroke={color}
+            strokeWidth="2"
+            strokeLinejoin="round"
+            fill="none"
+          />
+          <Circle cx="16" cy="4" r="2.2" fill={color} />
         </>
       );
     case 'pulse':
@@ -174,16 +217,6 @@ function renderShape(id: string, color: string) {
           {/* Obstacle wall with gap */}
           <Line x1="28" y1="3" x2="28" y2="9" stroke={color} strokeWidth="2" />
           <Line x1="28" y1="14" x2="28" y2="29" stroke={color} strokeWidth="2" />
-        </>
-      );
-    case 'polaroid':
-      // Polaroid card silhouette — outer rectangle, inner photo, dot for shutter.
-      return (
-        <>
-          <Rect x="4" y="6" width="24" height="22" stroke={color} strokeWidth="2" fill="none" />
-          <Rect x="7" y="9" width="18" height="13" fill={color} fillOpacity={0.6} />
-          <Circle cx="22" cy="25" r="1.5" fill={color} />
-          <Circle cx="18" cy="25" r="1.5" fill={color} fillOpacity={0.5} />
         </>
       );
     case 'tilt-maze':

@@ -190,7 +190,11 @@ function dueFreeTokens(now: number, lastGrantAt: number): number {
 
 /** Returns the cabinet ID promoted as today's free daily challenge. */
 export function getDailyCabinetId(now: number = Date.now()): string {
-  const liveIds = games.filter((g) => g.status === 'live').map((g) => g.id);
+  // Hidden cabinets are benched between content drops — never picked
+  // as the daily challenge.
+  const liveIds = games
+    .filter((g) => g.status === 'live' && !g.hidden)
+    .map((g) => g.id);
   if (liveIds.length === 0) return '';
   const dayIndex = Math.floor(now / ONE_DAY_MS);
   return liveIds[dayIndex % liveIds.length];
