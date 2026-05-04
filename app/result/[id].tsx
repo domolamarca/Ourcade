@@ -17,11 +17,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
 import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
 import { HighScoreRow } from '../../src/components/HighScoreRow';
 import { NeonFrame } from '../../src/components/NeonFrame';
+import { PbCelebration, CelebrationTier } from '../../src/components/PbCelebration';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { getGame } from '../../src/data/games';
 import {
@@ -83,23 +83,31 @@ export default function ResultScreen() {
   // Auto-submit on mount + grant any earned bonus tokens. Each cabinet
   // can pay a personal-best bonus (any new best), a top-10 bonus (first
   // time cracking #10), and a top-1 bonus (first time taking #1).
+  // The earned tier drives the PbCelebration overlay below.
   const submitFiredRef = useRef(false);
   const [bonusEarned, setBonusEarned] = useState(0);
+  const [celebrationTier, setCelebrationTier] = useState<CelebrationTier | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
   useEffect(() => {
     if (submitFiredRef.current) return;
     submitFiredRef.current = true;
 
-    const bonus = player.grantPbBonusIfBetter({
+    const result = player.grantPbBonusIfBetter({
       gameId: game.id,
       score,
       rank: placement.playerRank,
       lowerIsBetter: isLowerBetter(game.id),
     });
-    if (bonus > 0) {
-      setBonusEarned(bonus);
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success,
-      ).catch(() => {});
+    if (result.bonus > 0) {
+      setBonusEarned(result.bonus);
+      // Highest tier wins — first #1 trumps first top-10 trumps a plain PB.
+      const tier: CelebrationTier = result.isFirstTop1
+        ? 'top1'
+        : result.isFirstTop10
+          ? 'top10'
+          : 'pb';
+      setCelebrationTier(tier);
+      setShowCelebration(true);
     }
 
     submitScore({
@@ -350,6 +358,22 @@ export default function ResultScreen() {
       </ScrollView>
 
       <ScanlineOverlay opacity={0.05} />
+
+      {/* Personal-best celebration — shown ABOVE the result screen on
+          any run that earned a bonus. Dismissed on tap (after ticker
+          finishes) or auto-dismisses, revealing the leaderboard. */}
+      {showCelebration && celebrationTier ? (
+        <PbCelebration
+          game={game}
+          score={score}
+          detail={{ level, taps }}
+          rank={placement.playerRank}
+          total={placement.total}
+          bonus={bonusEarned}
+          tier={celebrationTier}
+          onDismiss={() => setShowCelebration(false)}
+        />
+      ) : null}
     </View>
   );
 }

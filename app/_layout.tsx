@@ -132,6 +132,10 @@ export default function RootLayout() {
           name="shop"
           options={{ presentation: 'modal', gestureEnabled: true }}
         />
+        <Stack.Screen
+          name="settings"
+          options={{ presentation: 'card', gestureEnabled: true }}
+        />
       </Stack>
     </SafeAreaProvider>
   );

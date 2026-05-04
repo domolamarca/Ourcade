@@ -92,6 +92,15 @@ export const TOKEN_PACKS: TokenPack[] = [
   },
 ];
 
+/** Per-player audio + haptic preferences. Toggles are inverted on screen
+ *  (the Settings UI shows "ON" when these are true). All default to true
+ *  so a fresh install gets the full feel. */
+export type PlayerSettings = {
+  soundOn: boolean;
+  hapticsOn: boolean;
+  musicOn: boolean;
+};
+
 type PlayerState = {
   /** True once the user has chosen real initials. False on first launch. */
   initialsChosen: boolean;
@@ -109,6 +118,16 @@ type PlayerState = {
   top10Awarded: string[];
   /** Cabinets where we've already paid the #1 bonus. */
   top1Awarded: string[];
+  /** Cabinets the player has dismissed the FIRST-PLAY DEMO for. */
+  seenTutorials: Record<string, boolean>;
+  /** Per-player audio + haptic toggles (Settings screen). */
+  settings: PlayerSettings;
+};
+
+const defaultSettings: PlayerSettings = {
+  soundOn: true,
+  hapticsOn: true,
+  musicOn: true,
 };
 
 const initial: PlayerState = {
@@ -123,6 +142,8 @@ const initial: PlayerState = {
   cabinetBests: {},
   top10Awarded: [],
   top1Awarded: [],
+  seenTutorials: {},
+  settings: { ...defaultSettings },
 };
 
 let state: PlayerState = { ...initial };
@@ -151,8 +172,14 @@ export async function loadPlayer(): Promise<void> {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<PlayerState>;
       // Merge into defaults so additions to PlayerState don't break
-      // upgrade paths.
-      state = { ...initial, ...parsed };
+      // upgrade paths. `settings` is deep-merged so partial saves
+      // (e.g. older versions missing a toggle key) inherit defaults
+      // for any unknown sub-keys instead of getting `undefined`.
+      state = {
+        ...initial,
+        ...parsed,
+        settings: { ...defaultSettings, ...(parsed.settings ?? {}) },
+      };
     }
     if (state.firstSeenAt === 0) {
       // First launch ever — record it for welcome-bonus tracking.
@@ -300,6 +327,62 @@ export function usePlayer() {
     },
 
     /**
+     * Has the player already seen the FIRST-PLAY DEMO for this cabinet?
+     *
+     * Treats existing players as already-tutored on any cabinet they've
+     * scored on (a `cabinetBests` entry implies they've played at least
+     * once and don't need the introduction). New players coming in fresh
+     * see the tutorial on every cabinet's first visit.
+     */
+    hasSeenTutorial: (gameId: string): boolean => {
+      if (state.seenTutorials?.[gameId]) return true;
+      if (state.cabinetBests?.[gameId] != null) return true;
+      return false;
+    },
+
+    /**
+     * Mark the FIRST-PLAY DEMO as dismissed for this cabinet — they
+     * won't see it again. Persisted to disk on next setState flush.
+     */
+    markTutorialSeen: (gameId: string) => {
+      if (state.seenTutorials?.[gameId]) return;
+      setState({
+        seenTutorials: { ...state.seenTutorials, [gameId]: true },
+      });
+    },
+
+    /**
+     * Flip a single audio/haptic toggle. Persists to AsyncStorage.
+     * Returns the new value so the caller can update local UI state
+     * without an extra render trip.
+     */
+    setSetting: <K extends keyof PlayerSettings>(
+      key: K,
+      value: PlayerSettings[K],
+    ): PlayerSettings[K] => {
+      setState({
+        settings: { ...state.settings, [key]: value },
+      });
+      return value;
+    },
+
+    /**
+     * Wipe all local player state and return to first-launch defaults.
+     * Used by the Settings → DELETE ACCOUNT flow. Caller is responsible
+     * for any server-side scrub (Supabase RPC) before invoking this.
+     */
+    resetPlayer: async (): Promise<void> => {
+      try {
+        await AsyncStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* swallow — even if disk write fails, in-memory wipe still happens */
+      }
+      state = { ...initial, settings: { ...defaultSettings }, firstSeenAt: Date.now() };
+      subscribers.forEach((fn) => fn(state));
+      persist();
+    },
+
+    /**
      * Try to redeem a promo code. Returns one of:
      *   { ok: true, tokens, label } — granted (also updates state)
      *   { ok: false, reason: 'invalid' | 'used' }
@@ -330,7 +413,15 @@ export function usePlayer() {
      * Reward a player who just finished a run. Issues bonus tokens for
      * personal bests and leaderboard milestones (top 10, top 1). Each
      * bonus is awarded at most once per cabinet for the milestone tiers
-     * to prevent farming. Returns the total bonus granted.
+     * to prevent farming.
+     *
+     * Returns a detailed result so the UI can pick the right celebration
+     * tier ("PERSONAL BEST" vs "TOP 10!" vs "WORLD RECORD"):
+     *   - bonus: total tokens credited this call
+     *   - isPb: this run beat the player's previous best on the cabinet
+     *   - isFirstTop10: first time this player ever ranked top-10 here
+     *   - isFirstTop1: first time this player ever took #1 here
+     *   - prevBest: the score they were beating (null on first ever play)
      *
      * Score comparison respects "lower is better" games via the
      * `lowerIsBetter` flag the caller passes in.
@@ -340,27 +431,38 @@ export function usePlayer() {
       score: number;
       rank: number;
       lowerIsBetter: boolean;
-    }): number => {
+    }): {
+      bonus: number;
+      isPb: boolean;
+      isFirstTop10: boolean;
+      isFirstTop1: boolean;
+      prevBest: number | null;
+    } => {
       const prev = state.cabinetBests[args.gameId];
-      const isBetter =
+      const prevBest = prev == null ? null : prev;
+      const isPb =
         prev == null
           ? true
           : args.lowerIsBetter
             ? args.score < prev
             : args.score > prev;
+      const isFirstTop10 =
+        args.rank <= 10 && !state.top10Awarded.includes(args.gameId);
+      const isFirstTop1 =
+        args.rank === 1 && !state.top1Awarded.includes(args.gameId);
 
       let bonus = 0;
       const patch: Partial<PlayerState> = {};
 
-      if (isBetter) {
+      if (isPb) {
         bonus += PB_BONUS_TOKENS;
         patch.cabinetBests = { ...state.cabinetBests, [args.gameId]: args.score };
       }
-      if (args.rank <= 10 && !state.top10Awarded.includes(args.gameId)) {
+      if (isFirstTop10) {
         bonus += TOP10_BONUS_TOKENS;
         patch.top10Awarded = [...state.top10Awarded, args.gameId];
       }
-      if (args.rank === 1 && !state.top1Awarded.includes(args.gameId)) {
+      if (isFirstTop1) {
         bonus += TOP1_BONUS_TOKENS;
         patch.top1Awarded = [...state.top1Awarded, args.gameId];
       }
@@ -368,7 +470,7 @@ export function usePlayer() {
         patch.tokens = state.tokens + bonus;
         setState(patch);
       }
-      return bonus;
+      return { bonus, isPb, isFirstTop10, isFirstTop1, prevBest };
     },
   };
 }

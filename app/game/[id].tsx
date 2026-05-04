@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
+import { FirstPlayDemo } from '../../src/components/FirstPlayDemo';
 import { GameIcon } from '../../src/components/GameIcon';
 import { HighScoreRow } from '../../src/components/HighScoreRow';
 import { NeonFrame } from '../../src/components/NeonFrame';
@@ -29,6 +30,13 @@ export default function PreGameScreen() {
   const game = id ? getGame(id) : undefined;
   const player = usePlayer();
   const [inserting, setInserting] = useState(false);
+  // First-play tutorial overlay — only on cabinets the player has
+  // never visited (or never scored on). Captured into local state on
+  // mount so the player hook updating to seenTutorials[id]=true on
+  // dismiss doesn't snap the overlay closed mid-fade.
+  const [showTutorial, setShowTutorial] = useState<boolean>(() =>
+    game ? !player.hasSeenTutorial(game.id) : false,
+  );
   // Token chip pulses when a coin is consumed.
   const chipPulse = useRef(new Animated.Value(1)).current;
 
@@ -41,6 +49,11 @@ export default function PreGameScreen() {
       </View>
     );
   }
+
+  const dismissTutorial = () => {
+    player.markTutorialSeen(game.id);
+    setShowTutorial(false);
+  };
 
   const accent = neon(game.accentColor);
   const best = getPlayerBest(game.id);
@@ -368,6 +381,13 @@ export default function PreGameScreen() {
 
         <ScanlineOverlay opacity={0.04} />
       </SafeAreaView>
+
+      {/* First-play tutorial overlay — covers the pre-game screen the
+          first time a player opens this cabinet. Dismissed via GOT IT;
+          marking seen persists to AsyncStorage so it never re-shows. */}
+      {showTutorial ? (
+        <FirstPlayDemo game={game} onDismiss={dismissTutorial} />
+      ) : null}
     </View>
   );
 }

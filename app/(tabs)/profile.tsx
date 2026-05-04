@@ -131,6 +131,43 @@ export default function ProfileScreen() {
           </NeonFrame>
         </View>
 
+        {/* Settings — sound, haptics, restore purchases, legal, delete account. */}
+        <View style={{ height: spacing.xl }} />
+        <Pressable onPress={() => router.push('/settings')}>
+          <NeonFrame
+            color={neon('cyan')}
+            thickness={2}
+            padding={spacing.md}
+            glow={false}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <View>
+                <ArcadeText
+                  variant="pixel"
+                  size={11}
+                  color={neon('cyan')}
+                  glowColor={neon('cyan')}
+                >
+                  {'SETTINGS'}
+                </ArcadeText>
+                <View style={{ height: 4 }} />
+                <ArcadeText variant="mono" size={13} color={colors.textDim}>
+                  {'Sound · Haptics · Privacy · Account'}
+                </ArcadeText>
+              </View>
+              <ArcadeText variant="pixel" size={20} color={neon('cyan')}>
+                {'>>'}
+              </ArcadeText>
+            </View>
+          </NeonFrame>
+        </Pressable>
+
         <View style={{ height: spacing.lg }} />
         <ArcadeText variant="pixel" size={7} color={colors.textMute} align="center">
           {'V0.1 — THEME PREVIEW BUILD'}
