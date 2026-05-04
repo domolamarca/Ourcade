@@ -69,14 +69,14 @@ export default function TitleScreen() {
           </View>
           <View style={{ height: spacing.lg }} />
           <ArcadeText variant="mono" size={20} color={colors.textDim} align="center">
-            {"everyone's arcade. every record yours."}
+            {"every game ours. every record yours."}
           </ArcadeText>
         </View>
 
         {/* Cabinet middle — empty by design, gives the eye a break */}
         <View style={{ alignItems: 'center', gap: spacing.xl }}>
           <ArcadeText variant="pixel" size={10} color={neon('green')}>
-            {'>>  20XX  OURCADE INC.'}
+            {'>>  2026  OURCADE INC.'}
           </ArcadeText>
           <ArcadeText variant="pixel" size={10} color={colors.textMute}>
             {'CREDITS  99'}

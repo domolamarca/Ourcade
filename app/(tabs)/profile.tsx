@@ -9,6 +9,13 @@ import { Blink } from '../../src/components/Blink';
 import { InitialsEntry } from '../../src/components/InitialsEntry';
 import { NeonFrame } from '../../src/components/NeonFrame';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
+import {
+  games,
+  SKILL_COLORS,
+  SKILL_LABELS,
+  SKILL_ORDER,
+  SkillCategory,
+} from '../../src/data/games';
 import { usePlayer } from '../../src/data/player';
 import { colors, neon, spacing } from '../../src/theme';
 
@@ -63,7 +70,7 @@ export default function ProfileScreen() {
             marginTop: spacing.xl,
           }}
         >
-          <Stat label="TOKENS" value={String(player.tokens)} color={neon('yellow')} />
+          <Stat label="CREDITS" value={String(player.tokens)} color={neon('yellow')} />
           <Stat label="PLAYS" value={String(player.totalPlays)} color={neon('magenta')} />
           <Stat label="#1 WINS" value={String(player.highScores)} color={neon('green')} />
         </View>
@@ -90,6 +97,45 @@ export default function ProfileScreen() {
                 )}
               </View>
               <ArcadeText variant="pixel" size={20} color={neon('yellow')}>
+                {'>>'}
+              </ArcadeText>
+            </View>
+          </NeonFrame>
+        </Pressable>
+
+        {/* Settings — sound, haptics, promo code, legal, delete account.
+            Moved above sensor status so the most-used utility surface
+            (toggles + account) is closer to the top of the page. */}
+        <View style={{ height: spacing.xl }} />
+        <Pressable onPress={() => router.push('/settings')}>
+          <NeonFrame
+            color={neon('cyan')}
+            thickness={2}
+            padding={spacing.md}
+            glow={false}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <View>
+                <ArcadeText
+                  variant="pixel"
+                  size={11}
+                  color={neon('cyan')}
+                  glowColor={neon('cyan')}
+                >
+                  {'SETTINGS'}
+                </ArcadeText>
+                <View style={{ height: 4 }} />
+                <ArcadeText variant="mono" size={13} color={colors.textDim}>
+                  {'Sound · Haptics · Privacy · Account'}
+                </ArcadeText>
+              </View>
+              <ArcadeText variant="pixel" size={20} color={neon('cyan')}>
                 {'>>'}
               </ArcadeText>
             </View>
@@ -131,42 +177,55 @@ export default function ProfileScreen() {
           </NeonFrame>
         </View>
 
-        {/* Settings — sound, haptics, promo code, legal, delete account. */}
-        <View style={{ height: spacing.xl }} />
-        <Pressable onPress={() => router.push('/settings')}>
-          <NeonFrame
-            color={neon('cyan')}
-            thickness={2}
-            padding={spacing.md}
-            glow={false}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <View>
-                <ArcadeText
-                  variant="pixel"
-                  size={11}
-                  color={neon('cyan')}
-                  glowColor={neon('cyan')}
+        {/* Skill categories — color key for the lobby's bucket headers
+            so a player who wonders "what's the red row?" has an answer
+            without leaving the app. Counts only show visible cabinets
+            (hidden ones don't render in the lobby). */}
+        <View style={{ marginTop: spacing.xl }}>
+          <ArcadeText variant="pixel" size={9} color={colors.textMute}>
+            {'>> SKILL CATEGORIES'}
+          </ArcadeText>
+          <View style={{ height: spacing.sm }} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+            {SKILL_ORDER.map((skill) => {
+              const skillColor = neon(SKILL_COLORS[skill]);
+              const count = cabinetCountForSkill(skill);
+              return (
+                <View
+                  key={skill}
+                  style={{ width: '48%' }}
                 >
-                  {'SETTINGS'}
-                </ArcadeText>
-                <View style={{ height: 4 }} />
-                <ArcadeText variant="mono" size={13} color={colors.textDim}>
-                  {'Sound · Haptics · Privacy · Account'}
-                </ArcadeText>
-              </View>
-              <ArcadeText variant="pixel" size={20} color={neon('cyan')}>
-                {'>>'}
-              </ArcadeText>
-            </View>
-          </NeonFrame>
-        </Pressable>
+                  <NeonFrame
+                    color={skillColor}
+                    thickness={2}
+                    padding={spacing.sm}
+                    glow={false}
+                    fill={colors.bgSurface}
+                  >
+                    <ArcadeText
+                      variant="pixel"
+                      size={10}
+                      color={skillColor}
+                      glowColor={skillColor}
+                      align="center"
+                    >
+                      {SKILL_LABELS[skill]}
+                    </ArcadeText>
+                    <View style={{ height: 4 }} />
+                    <ArcadeText
+                      variant="mono"
+                      size={18}
+                      color={skillColor}
+                      align="center"
+                    >
+                      {`${count} CABINET${count === 1 ? '' : 'S'}`}
+                    </ArcadeText>
+                  </NeonFrame>
+                </View>
+              );
+            })}
+          </View>
+        </View>
 
         <View style={{ height: spacing.lg }} />
         <ArcadeText variant="pixel" size={7} color={colors.textMute} align="center">
@@ -177,6 +236,13 @@ export default function ProfileScreen() {
       <ScanlineOverlay opacity={0.05} />
     </View>
   );
+}
+
+/** How many visible (non-hidden) cabinets fall into a given skill bucket.
+ *  Hidden cabinets are excluded — they aren't shown in the lobby, so
+ *  the count would mislead players. */
+function cabinetCountForSkill(skill: SkillCategory): number {
+  return games.filter((g) => g.skill === skill && !g.hidden).length;
 }
 
 function Stat({ label, value, color }: { label: string; value: string; color: string }) {
