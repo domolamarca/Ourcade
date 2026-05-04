@@ -2,7 +2,7 @@
 title: Ourcade
 ---
 
-<p align="center"><img src="ourcade-logo.svg" alt="Ourcade" width="320" /></p>
+<p align="center"><object data="ourcade-logo.svg" type="image/svg+xml" width="400" aria-label="Ourcade">Ourcade</object></p>
 
 # Ourcade
 

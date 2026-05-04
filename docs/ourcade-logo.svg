@@ -1,60 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  OURCADE wordmark, hand-drawn as a 5x7 pixel font in SVG. Mirrors the
-  in-app title-screen treatment: 'OUR' in neon cyan, 'CADE' in neon
-  magenta, dark background. Pure rect elements so it renders without
-  any font dependency on any device or browser.
+  OURCADE wordmark — uses the actual Press Start 2P font from Google
+  Fonts so it renders identically to the in-app title screen. The
+  @import inside the <style> block fetches the font when the SVG is
+  embedded via <object> or loaded directly in a browser. When embedded
+  via <img>, browsers don't fetch external CSS — so use <object> in
+  HTML if you want the font to load every time.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 11" width="500" height="110" shape-rendering="crispEdges">
-  <rect width="50" height="11" fill="#08080f"/>
-  <g transform="translate(2, 2)">
-    <!-- OUR — cyan -->
-    <g fill="#00f0ff">
-      <!-- O at x=0 -->
-      <rect x="1" y="0" width="3" height="1"/>
-      <rect x="0" y="1" width="1" height="5"/>
-      <rect x="4" y="1" width="1" height="5"/>
-      <rect x="1" y="6" width="3" height="1"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 110" width="600" height="110">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+      .wm {
+        font-family: 'Press Start 2P', 'Courier New', monospace;
+        font-size: 64px;
+        letter-spacing: 2px;
+      }
+    </style>
+    <!-- Cyan glow used by OUR -->
+    <filter id="cyanGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <!-- Magenta glow used by CADE -->
+    <filter id="magentaGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
 
-      <!-- U at x=6 -->
-      <rect x="6" y="0" width="1" height="6"/>
-      <rect x="10" y="0" width="1" height="6"/>
-      <rect x="7" y="6" width="3" height="1"/>
+  <rect width="600" height="110" fill="#08080f"/>
 
-      <!-- R at x=12 -->
-      <rect x="12" y="0" width="4" height="1"/>
-      <rect x="12" y="1" width="1" height="6"/>
-      <rect x="16" y="1" width="1" height="2"/>
-      <rect x="12" y="3" width="4" height="1"/>
-      <rect x="14" y="4" width="1" height="1"/>
-      <rect x="15" y="5" width="1" height="1"/>
-      <rect x="16" y="6" width="1" height="1"/>
-    </g>
-
-    <!-- CADE — magenta, starts after OUR + 1px gap -->
-    <g fill="#ff2bd6" transform="translate(20, 0)">
-      <!-- C at x=0 -->
-      <rect x="1" y="0" width="3" height="1"/>
-      <rect x="0" y="1" width="1" height="5"/>
-      <rect x="1" y="6" width="3" height="1"/>
-
-      <!-- A at x=6 -->
-      <rect x="7" y="0" width="3" height="1"/>
-      <rect x="6" y="1" width="1" height="6"/>
-      <rect x="10" y="1" width="1" height="6"/>
-      <rect x="6" y="3" width="5" height="1"/>
-
-      <!-- D at x=12 -->
-      <rect x="12" y="0" width="4" height="1"/>
-      <rect x="12" y="1" width="1" height="5"/>
-      <rect x="16" y="1" width="1" height="5"/>
-      <rect x="12" y="6" width="4" height="1"/>
-
-      <!-- E at x=18 -->
-      <rect x="18" y="0" width="5" height="1"/>
-      <rect x="18" y="1" width="1" height="6"/>
-      <rect x="18" y="3" width="4" height="1"/>
-      <rect x="18" y="6" width="5" height="1"/>
-    </g>
-  </g>
+  <text class="wm" x="300" y="78" text-anchor="middle">
+    <tspan fill="#00f0ff" filter="url(#cyanGlow)">OUR</tspan><tspan fill="#ff2bd6" filter="url(#magentaGlow)">CADE</tspan>
+  </text>
 </svg>
