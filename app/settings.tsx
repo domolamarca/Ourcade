@@ -22,6 +22,11 @@ import { colors, neon, spacing } from '../src/theme';
 // shipped to TestFlight + the App Store keeps working.
 const PRIVACY_URL = 'https://domolamarca.github.io/Ourcade/privacy.html';
 const TERMS_URL = 'https://domolamarca.github.io/Ourcade/terms.html';
+// Apple expects a working support contact reachable from inside the
+// app. mailto: opens the user's default mail client with a prefilled
+// subject so triage is easier on the receiving end.
+const SUPPORT_EMAIL = 'domlamarca@gmail.com';
+const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Ourcade Support')}`;
 
 export default function SettingsScreen() {
   const player = usePlayer();
@@ -172,10 +177,17 @@ export default function SettingsScreen() {
           />
         </NeonFrame>
 
-        {/* LEGAL */}
+        {/* LEGAL + SUPPORT */}
         <View style={{ height: spacing.xl }} />
-        <SectionLabel text="LEGAL" />
+        <SectionLabel text="HELP & LEGAL" />
         <NeonFrame color={colors.border} thickness={1} glow={false} padding={0}>
+          <Row
+            label="CONTACT SUPPORT"
+            sub={SUPPORT_EMAIL}
+            onPress={openLink(SUPPORT_MAILTO)}
+            external
+          />
+          <Divider />
           <Row label="PRIVACY POLICY" onPress={openLink(PRIVACY_URL)} external />
           <Divider />
           <Row label="TERMS OF SERVICE" onPress={openLink(TERMS_URL)} external />

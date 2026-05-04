@@ -290,7 +290,7 @@ export default function ResultScreen() {
                   color={neon('green')}
                   glowColor={neon('green')}
                 >
-                  {`+${bonusEarned} TOKENS  ★`}
+                  {`+${bonusEarned} CREDITS  ★`}
                 </ArcadeText>
               </NeonFrame>
               <View style={{ height: 4 }} />
@@ -463,6 +463,28 @@ export default function ResultScreen() {
       </ScrollView>
 
       <ScanlineOverlay opacity={0.05} />
+
+      {/* Subtle bottom-corner watermark so screenshots of high scores
+          carry the brand without needing a built-in share button. Sits
+          above the scanline overlay so it's legible in captures. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          right: spacing.md,
+          bottom: spacing.lg,
+          flexDirection: 'row',
+          alignItems: 'baseline',
+          opacity: 0.55,
+        }}
+      >
+        <ArcadeText variant="pixel" size={8} color={neon('cyan')}>
+          {'★ OUR'}
+        </ArcadeText>
+        <ArcadeText variant="pixel" size={8} color={neon('magenta')}>
+          {'CADE'}
+        </ArcadeText>
+      </View>
 
       {/* Personal-best celebration — shown ABOVE the result screen on
           any run that earned a bonus. Dismissed on tap (after ticker

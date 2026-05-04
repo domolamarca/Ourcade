@@ -106,7 +106,7 @@ export default function Shop() {
               color={neon('yellow')}
               glowColor={neon('yellow')}
             >
-              {'TOKENS'}
+              {'CREDITS'}
             </ArcadeText>
           </View>
           <Pressable onPress={() => router.back()}>
@@ -148,7 +148,7 @@ export default function Shop() {
                 </ArcadeText>
               </View>
               <ArcadeText variant="pixel" size={9} color={colors.textDim}>
-                {'TOKENS'}
+                {'CREDITS'}
               </ArcadeText>
             </View>
           </NeonFrame>
@@ -193,7 +193,7 @@ export default function Shop() {
                     </ArcadeText>
                     <View style={{ height: 4 }} />
                     <ArcadeText variant="mono" size={16} color={colors.text}>
-                      {`+${pendingFree} TOKENS · TAP TO CLAIM`}
+                      {`+${pendingFree} CREDITS · TAP TO CLAIM`}
                     </ArcadeText>
                   </View>
                   <ArcadeText variant="pixel" size={20} color={neon('green')}>
@@ -295,7 +295,7 @@ export default function Shop() {
                   color={neon('green')}
                   glowColor={neon('green')}
                 >
-                  {`+${feedback.tokens} TOKENS  ★`}
+                  {`+${feedback.tokens} CREDITS  ★`}
                 </ArcadeText>
                 <View style={{ height: 4 }} />
                 <ArcadeText variant="mono" size={13} color={colors.textDim}>
@@ -312,7 +312,7 @@ export default function Shop() {
               </ArcadeText>
             ) : (
               <ArcadeText variant="pixel" size={8} color={colors.textMute}>
-                {'CHECK SOCIAL FOR DROPS · CODES VARY 25–2,500 TOKENS'}
+                {'CHECK SOCIAL FOR DROPS · CODES VARY 25–2,500 CREDITS'}
               </ArcadeText>
             )}
           </NeonFrame>
@@ -402,7 +402,7 @@ export default function Shop() {
                         {pack.tokens}
                       </ArcadeText>
                       <ArcadeText variant="pixel" size={7} color={colors.textMute}>
-                        {'TOKENS'}
+                        {'CREDITS'}
                       </ArcadeText>
                       <View style={{ height: 4 }} />
                       <View

@@ -192,7 +192,7 @@ export default function PreGameScreen() {
               }}
             >
               <ArcadeText variant="pixel" size={7} color={colors.textMute}>
-                {'TOKENS'}
+                {'CREDITS'}
               </ArcadeText>
               <ArcadeText
                 variant="mono"
@@ -337,7 +337,16 @@ export default function PreGameScreen() {
                 </ArcadeText>
               </View>
             ) : (
-              top.map((s, i) => <HighScoreRow key={s.id} rank={i + 1} score={s} />)
+              top.map((s, i) => (
+                <HighScoreRow
+                  key={s.id}
+                  rank={i + 1}
+                  score={s}
+                  // Highlight the player's row when their initials hold a
+                  // top-5 spot — gives a "defend your rank" hook on entry.
+                  highlight={s.initials === player.initials}
+                />
+              ))
             )}
           </NeonFrame>
         </View>
@@ -412,7 +421,7 @@ export default function PreGameScreen() {
                     glowColor={neon('red')}
                     align="center"
                   >
-                    {'NO  COINS'}
+                    {'NO  CREDITS'}
                   </ArcadeText>
                   <View style={{ height: 4 }} />
                   <ArcadeText
@@ -434,7 +443,7 @@ export default function PreGameScreen() {
                       glowColor={isDaily ? neon('green') : accent}
                       align="center"
                     >
-                      {isDaily ? '★ FREE TODAY · PLAY ▶' : 'INSERT  COIN  ▼'}
+                      {isDaily ? '★ FREE TODAY · PLAY ▶' : 'INSERT  CREDIT  ▼'}
                     </ArcadeText>
                   </Blink>
                   <View style={{ height: 4 }} />
@@ -444,7 +453,7 @@ export default function PreGameScreen() {
                     color={colors.textMute}
                     align="center"
                   >
-                    {isDaily ? 'NO TOKEN — DAILY CHALLENGE' : 'COSTS 1 TOKEN'}
+                    {isDaily ? 'FREE — DAILY CHALLENGE' : 'COSTS 1 CREDIT'}
                   </ArcadeText>
                 </View>
               ) : (

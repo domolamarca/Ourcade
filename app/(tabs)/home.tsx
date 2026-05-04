@@ -116,7 +116,7 @@ export default function HomeScreen() {
               }}
             >
               <ArcadeText variant="pixel" size={7} color={colors.textMute}>
-                {'TOKENS  +'}
+                {'CREDITS  +'}
               </ArcadeText>
               <ArcadeText
                 variant="mono"

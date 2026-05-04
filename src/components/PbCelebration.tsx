@@ -303,7 +303,7 @@ export function PbCelebration({
               glowColor={cfg.color}
               align="center"
             >
-              {`+${bonus} TOKENS  ★`}
+              {`+${bonus} CREDITS  ★`}
             </ArcadeText>
           </NeonFrame>
         </Animated.View>

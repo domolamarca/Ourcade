@@ -74,7 +74,7 @@ export default function ProfileScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <View>
                 <ArcadeText variant="pixel" size={9} color={neon('yellow')} glowColor={neon('yellow')}>
-                  {'NEED MORE TOKENS?'}
+                  {'NEED MORE CREDITS?'}
                 </ArcadeText>
                 <View style={{ height: 4 }} />
                 {player.pendingFreeTokens() > 0 ? (
