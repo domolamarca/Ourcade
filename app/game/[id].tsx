@@ -23,13 +23,47 @@ import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { getGame } from '../../src/data/games';
 import { getPlayerBest, getTopScores } from '../../src/data/leaderboard';
 import { getDailyCabinetId, usePlayer } from '../../src/data/player';
+import {
+  setActiveChallenge,
+  clearActiveChallenge,
+} from '../../src/lib/challenge';
 import { colors, neon, spacing } from '../../src/theme';
 
 export default function PreGameScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, challenger, cscore } = useLocalSearchParams<{
+    id: string;
+    challenger?: string;
+    cscore?: string;
+  }>();
   const game = id ? getGame(id) : undefined;
   const player = usePlayer();
   const [inserting, setInserting] = useState(false);
+
+  // Challenge plumbing: if the route was opened from a challenge URL,
+  // record the active challenge so the result screen can detect "you
+  // beat them" and show the SEND IT BACK button. Cleared on unmount so
+  // backing out to the lobby drops you out of challenge mode.
+  const challengeScore =
+    cscore != null && !Number.isNaN(Number(cscore)) ? Number(cscore) : null;
+  const challengerInitials = challenger ? challenger.toUpperCase() : null;
+  useEffect(() => {
+    if (game && challengerInitials && challengeScore != null) {
+      setActiveChallenge({
+        gameId: game.id,
+        challenger: challengerInitials,
+        challengerScore: challengeScore,
+      });
+    }
+    return () => {
+      // Only clear if THIS screen set it — backing out from a challenge
+      // run shouldn't drop someone else's challenge if they're nested
+      // somehow. In v1.0 routing the only way to set is via this
+      // effect, so clearing on unmount is safe.
+      if (challengerInitials && challengeScore != null) {
+        clearActiveChallenge();
+      }
+    };
+  }, [game, challengerInitials, challengeScore]);
   // First-play tutorial overlay — only on cabinets the player has
   // never visited (or never scored on). Captured into local state on
   // mount so the player hook updating to seenTutorials[id]=true on
@@ -171,6 +205,50 @@ export default function PreGameScreen() {
             </Pressable>
           </Animated.View>
         </View>
+
+        {/* Challenge banner — only when this route was opened via a
+            challenge URL. Sits above the title block so the player's
+            eye lands on it first. */}
+        {challengerInitials && challengeScore != null && game ? (
+          <View
+            style={{
+              marginHorizontal: spacing.lg,
+              marginBottom: spacing.sm,
+            }}
+          >
+            <NeonFrame
+              color={neon('green')}
+              thickness={2}
+              padding={spacing.sm}
+              glow
+              fill={colors.bgSurface}
+            >
+              <View style={{ alignItems: 'center' }}>
+                <Blink intervalMs={520} minOpacity={0.55}>
+                  <ArcadeText
+                    variant="pixel"
+                    size={10}
+                    color={neon('green')}
+                    glowColor={neon('green')}
+                    align="center"
+                  >
+                    {`★ ${challengerInitials} CHALLENGED YOU ★`}
+                  </ArcadeText>
+                </Blink>
+                <View style={{ height: 4 }} />
+                <ArcadeText
+                  variant="mono"
+                  size={20}
+                  color={neon('green')}
+                  glowColor={neon('green')}
+                  align="center"
+                >
+                  {`BEAT ${formatVal(challengeScore, game)}`}
+                </ArcadeText>
+              </View>
+            </NeonFrame>
+          </View>
+        ) : null}
 
         {/* Title block — icon, name, tagline */}
         <View

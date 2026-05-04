@@ -14,7 +14,7 @@
 //   action buttons
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, Share, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../../src/components/ArcadeText';
@@ -31,6 +31,13 @@ import {
   submitScore,
 } from '../../src/data/leaderboard';
 import { usePlayer } from '../../src/data/player';
+import {
+  buildChallengeMessage,
+  buildChallengeUrl,
+  clearActiveChallenge,
+  didBeatActiveChallenge,
+  getActiveChallenge,
+} from '../../src/lib/challenge';
 import { colors, neon, spacing } from '../../src/theme';
 
 const TOP_ROWS_BEFORE_GAP = 5;
@@ -84,10 +91,20 @@ export default function ResultScreen() {
   // can pay a personal-best bonus (any new best), a top-10 bonus (first
   // time cracking #10), and a top-1 bonus (first time taking #1).
   // The earned tier drives the PbCelebration overlay below.
+  //
+  // Also captures the in-flight challenge (if any) so we can show the
+  // "YOU BEAT THEM" stinger and the SEND IT BACK button. We snapshot
+  // the challenger before clearing it from the global state — that way
+  // a quick PLAY AGAIN doesn't replay the challenge banner on the
+  // pre-game screen of the next run.
   const submitFiredRef = useRef(false);
   const [bonusEarned, setBonusEarned] = useState(0);
   const [celebrationTier, setCelebrationTier] = useState<CelebrationTier | null>(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [beatChallenger, setBeatChallenger] = useState<{
+    initials: string;
+    score: number;
+  } | null>(null);
   useEffect(() => {
     if (submitFiredRef.current) return;
     submitFiredRef.current = true;
@@ -110,6 +127,24 @@ export default function ResultScreen() {
       setShowCelebration(true);
     }
 
+    // Did this run beat an active challenge? Snapshot before clearing
+    // so the screen state stays even after we drop out of challenge mode.
+    const active = getActiveChallenge();
+    if (
+      active &&
+      didBeatActiveChallenge(game.id, score, isLowerBetter(game.id))
+    ) {
+      setBeatChallenger({
+        initials: active.challenger,
+        score: active.challengerScore,
+      });
+    }
+    if (active && active.gameId === game.id) {
+      // Clear so PLAY AGAIN doesn't replay the challenge banner on
+      // the next pre-game render.
+      clearActiveChallenge();
+    }
+
     submitScore({
       gameId: game.id,
       initials: player.initials,
@@ -124,6 +159,33 @@ export default function ResultScreen() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // CHALLENGE — open the native share sheet with prefilled iMessage
+  // text + a deep-link URL. Friend who taps the URL opens Ourcade
+  // straight to this cabinet with the score to beat. Uses the built-in
+  // RN Share API so iOS shows Messages, Mail, WhatsApp, etc.
+  const handleChallenge = async () => {
+    if (!game) return;
+    const formattedScore = game.formatScore
+      ? game.formatScore(score, { level, taps })
+      : Number.isInteger(score)
+        ? score.toLocaleString()
+        : score.toFixed(2);
+    const message = buildChallengeMessage({
+      game,
+      initials: player.initials,
+      score,
+      formattedScore,
+    });
+    try {
+      await Share.share({
+        message,
+        url: buildChallengeUrl(game.id, player.initials, score),
+      });
+    } catch {
+      /* user cancelled or share unavailable — fail silently */
+    }
+  };
 
   // PLAY AGAIN charges a token (or is free if this is today's daily).
   // Insufficient → routes to /shop. Live games go straight to their
@@ -248,6 +310,29 @@ export default function ResultScreen() {
               </ArcadeText>
             </View>
           ) : null}
+          {beatChallenger ? (
+            <View style={{ marginTop: spacing.md, alignItems: 'center' }}>
+              <NeonFrame
+                color={neon('green')}
+                thickness={2}
+                padding={spacing.sm}
+                glow
+                fill={colors.bgSurface}
+              >
+                <Blink intervalMs={420} minOpacity={0.55}>
+                  <ArcadeText
+                    variant="pixel"
+                    size={11}
+                    color={neon('green')}
+                    glowColor={neon('green')}
+                    align="center"
+                  >
+                    {`★ YOU BEAT ${beatChallenger.initials} ★`}
+                  </ArcadeText>
+                </Blink>
+              </NeonFrame>
+            </View>
+          ) : null}
         </View>
 
 
@@ -331,7 +416,9 @@ export default function ResultScreen() {
           )}
         </NeonFrame>
 
-        {/* Actions */}
+        {/* Actions — CHALLENGE button shows for any submitted run; label
+            switches to "SEND IT BACK" when this run beat an incoming
+            challenger so the loop closes naturally. */}
         <View
           style={{
             flexDirection: 'row',
@@ -344,6 +431,24 @@ export default function ResultScreen() {
             <NeonFrame color={accent} thickness={2} padding={spacing.md} glow>
               <ArcadeText variant="pixel" size={10} color={accent} align="center">
                 {'PLAY  AGAIN'}
+              </ArcadeText>
+            </NeonFrame>
+          </Pressable>
+          <Pressable onPress={handleChallenge} style={{ flex: 1 }}>
+            <NeonFrame
+              color={neon('green')}
+              thickness={2}
+              padding={spacing.md}
+              glow
+            >
+              <ArcadeText
+                variant="pixel"
+                size={10}
+                color={neon('green')}
+                glowColor={neon('green')}
+                align="center"
+              >
+                {beatChallenger ? 'SEND IT BACK' : 'CHALLENGE'}
               </ArcadeText>
             </NeonFrame>
           </Pressable>
