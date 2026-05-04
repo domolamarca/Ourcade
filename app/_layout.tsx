@@ -17,6 +17,8 @@ import {
 } from '@expo-google-fonts/vt323';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { loadLeaderboard } from '../src/data/leaderboard';
+import { loadPlayer } from '../src/data/player';
 import { colors } from '../src/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -31,6 +33,12 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
   }, [ready]);
+
+  // Hydrate persistent state at boot.
+  useEffect(() => {
+    loadPlayer().catch(() => {});
+    loadLeaderboard().catch(() => {});
+  }, []);
 
   if (!ready) {
     // Keep the screen black-flat while fonts download — splash is still up.
@@ -49,6 +57,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding/initials" />
         <Stack.Screen name="game/[id]" options={{ presentation: 'card' }} />
         <Stack.Screen
           name="play/tap-bullseye"
@@ -88,6 +97,14 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="play/pulse"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/memory-grid"
+          options={{ presentation: 'card', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="play/stroop"
           options={{ presentation: 'card', gestureEnabled: false }}
         />
         <Stack.Screen name="result/[id]" options={{ presentation: 'card' }} />

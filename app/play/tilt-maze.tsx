@@ -7,6 +7,12 @@
 // ends the run instantly. Score is composite: (level reached) ×
 // 1,000,000 − elapsed_ms; higher wins, faster ties.
 //
+// INFINITE MODE: after the 20-level loop completes, the game loops back
+// to level 1 with a difficulty multiplier (lap 2 = +10% gravity & cap,
+// hazards cycle 10% faster). Each subsequent lap stacks more, capped
+// at +50%. Players can climb levels indefinitely; high scores can
+// always be topped.
+//
 // Tile effects are placed along certain levels:
 //   - boost (yellow): amplifies ball speed while it overlaps
 //   - slow  (purple): heavy drag while it overlaps
@@ -157,9 +163,21 @@ export default function TiltMazeGame() {
   }
 
   function initBallForLevel(idx: number) {
-    const lvl = LEVELS[idx];
+    const lvl = LEVELS[idx % LEVELS.length];
     const start = lvl.path[0];
     ballRef.current = { x: start.x, y: start.y, vx: 0, vy: 0 };
+  }
+
+  // Lap = how many full passes through LEVELS the player is on.
+  // Lap 1 covers absolute levels 0..19 (displayed L1..L20).
+  // Lap 2 covers 20..39 (L21..L40), etc.
+  // Each lap past the first adds 10% to gravity, max velocity, and
+  // hazard speed, capped at +50% (lap 6).
+  function lapForAbs(absIdx: number): number {
+    return Math.floor(absIdx / LEVELS.length) + 1;
+  }
+  function lapMultiplier(lap: number): number {
+    return Math.min(1.5, 1 + 0.10 * (lap - 1));
   }
 
   function scheduleFrame() {
@@ -175,11 +193,13 @@ export default function TiltMazeGame() {
 
     const ball = ballRef.current;
     const accel = accelRef.current;
-    const lvl = LEVELS[levelIdxRef.current];
+    const lvl = LEVELS[levelIdxRef.current % LEVELS.length];
+    const lap = lapForAbs(levelIdxRef.current);
+    const lapMult = lapMultiplier(lap);
 
     // --- Apply tilt-derived acceleration -----------------------------
-    ball.vx += accel.x * ACCEL_FACTOR * dt;
-    ball.vy += -accel.y * ACCEL_FACTOR * dt;
+    ball.vx += accel.x * ACCEL_FACTOR * lapMult * dt;
+    ball.vy += -accel.y * ACCEL_FACTOR * lapMult * dt;
 
     // --- Apply baseline friction (time-corrected) --------------------
     const friction = Math.pow(FRICTION, dt * 60);
@@ -220,7 +240,8 @@ export default function TiltMazeGame() {
     }
 
     // --- Cap velocity ------------------------------------------------
-    const maxV = onBoost ? MAX_VELOCITY_PX_S * 1.4 : MAX_VELOCITY_PX_S;
+    const baseMaxV = MAX_VELOCITY_PX_S * lapMult;
+    const maxV = onBoost ? baseMaxV * 1.4 : baseMaxV;
     const speed = Math.hypot(ball.vx, ball.vy);
     if (speed > maxV) {
       ball.vx = (ball.vx / speed) * maxV;
@@ -255,7 +276,7 @@ export default function TiltMazeGame() {
 
     // --- Hazard collision --------------------------------------------
     for (const hz of lvl.hazards) {
-      const pos = hazardPosition(hz, now);
+      const pos = hazardPosition(hz, now, lapMult);
       const d = Math.hypot(ball.x - pos.x, ball.y - pos.y);
       if (d < BALL_RADIUS + hz.radius) {
         triggerFail('HIT BY HAZARD');
@@ -282,18 +303,15 @@ export default function TiltMazeGame() {
     setPhaseSafe('level-clear');
 
     transitionTimeoutRef.current = setTimeout(() => {
+      // Infinite progression: levels keep climbing past LEVELS.length.
+      // Layout loops via mod-index; difficulty stacks per lap.
       const next = levelIdxRef.current + 1;
-      if (next >= LEVELS.length) {
-        setPhaseSafe('all-clear');
-        finalize(true);
-      } else {
-        levelIdxRef.current = next;
-        setLevelIdx(next);
-        initBallForLevel(next);
-        setPhaseSafe('playing');
-        lastFrameRef.current = Date.now();
-        scheduleFrame();
-      }
+      levelIdxRef.current = next;
+      setLevelIdx(next);
+      initBallForLevel(next);
+      setPhaseSafe('playing');
+      lastFrameRef.current = Date.now();
+      scheduleFrame();
     }, LEVEL_CLEAR_HOLD_MS);
   }
 
@@ -305,8 +323,10 @@ export default function TiltMazeGame() {
     finalize(false);
   }
 
-  function finalize(beatAll: boolean) {
-    const reached = beatAll ? LEVELS.length : levelIdxRef.current + 1;
+  function finalize(_beatAll: boolean) {
+    // Always score by absolute level reached. Composite score keeps
+    // climbing without a cap.
+    const reached = levelIdxRef.current + 1;
     const elapsedMs = elapsedMsRef.current;
     const score = reached * 1_000_000 - elapsedMs;
 
@@ -325,7 +345,7 @@ export default function TiltMazeGame() {
   }
 
   // ---- Render --------------------------------------------------------
-  const lvl = LEVELS[levelIdxRef.current];
+  const lvl = LEVELS[levelIdxRef.current % LEVELS.length];
   const ball = ballRef.current;
   const now = Date.now();
 
@@ -339,6 +359,7 @@ export default function TiltMazeGame() {
             justifyContent: 'space-between',
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
+            paddingLeft: 44, // room for EXIT chip on the left
           }}
         >
           <View>
@@ -348,9 +369,23 @@ export default function TiltMazeGame() {
             <ArcadeText variant="mono" size={22} color={ACCENT} glowColor={ACCENT}>
               {`L${levelIdx + 1}`}
             </ArcadeText>
-            <ArcadeText variant="pixel" size={7} color={colors.textDim}>
-              {phase === 'playing' ? lvl.name : ''}
-            </ArcadeText>
+            {(() => {
+              const lap = lapForAbs(levelIdx);
+              return (
+                <ArcadeText
+                  variant="pixel"
+                  size={7}
+                  color={lap > 1 ? neon('yellow') : colors.textDim}
+                  glowColor={lap > 1 ? neon('yellow') : undefined}
+                >
+                  {lap > 1
+                    ? `LAP ${lap} · ${lvl.name}`
+                    : phase === 'playing'
+                      ? lvl.name
+                      : ''}
+                </ArcadeText>
+              );
+            })()}
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <ArcadeText variant="pixel" size={7} color={colors.textMute}>
@@ -454,7 +489,7 @@ export default function TiltMazeGame() {
 
           {/* Hazards */}
           {lvl.hazards.map((hz, i) => {
-            const pos = hazardPosition(hz, now);
+            const pos = hazardPosition(hz, now, lapMultiplier(lapForAbs(levelIdxRef.current)));
             return (
               <G key={`hz-${i}`}>
                 <Circle cx={hz.pivot.x} cy={hz.pivot.y} r={4} fill={colors.textMute} />
@@ -512,7 +547,7 @@ export default function TiltMazeGame() {
               color={colors.textDim}
               align="center"
             >
-              {`STAY ON THE PATH.\n${LEVELS.length} LEVELS · ONE LIFE.`}
+              {`STAY ON THE PATH.\nLOOPS WITH STACKING DIFFICULTY.\nONE LIFE.`}
             </ArcadeText>
             <View style={{ height: spacing.lg }} />
             <Blink>
@@ -887,11 +922,13 @@ function TileRect({
   );
 }
 
-function hazardPosition(hz: Hazard, nowMs: number): Point {
+function hazardPosition(hz: Hazard, nowMs: number, speedMult: number = 1): Point {
   const phase = hz.phase ?? 0;
   const amp = hz.amplitude ?? Math.PI / 2.6;
+  // Faster swing in higher laps: shorter effective period.
+  const period = hz.periodMs / Math.max(0.2, speedMult);
   const angle =
-    Math.sin(2 * Math.PI * (nowMs / hz.periodMs) + phase * 2 * Math.PI) * amp;
+    Math.sin(2 * Math.PI * (nowMs / period) + phase * 2 * Math.PI) * amp;
   return {
     x: hz.pivot.x + Math.sin(angle) * hz.armLength,
     y: hz.pivot.y + Math.cos(angle) * hz.armLength,

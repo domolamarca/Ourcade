@@ -94,6 +94,8 @@ export default function PreGameScreen() {
       else if (game.id === 'trivia') router.push('/play/trivia');
       else if (game.id === 'draw-it') router.push('/play/draw-it');
       else if (game.id === 'pulse') router.push('/play/pulse');
+      else if (game.id === 'memory-grid') router.push('/play/memory-grid');
+      else if (game.id === 'stroop') router.push('/play/stroop');
       else {
         player.refundToken();
         router.replace('/home');

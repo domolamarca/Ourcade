@@ -201,6 +201,37 @@ function renderShape(id: string, color: string) {
           <Circle cx="28" cy="22" r="3.5" fill={color} />
         </>
       );
+    case 'memory-grid':
+      // 3x3 grid of cells, with two cells lit up to suggest a sequence.
+      return (
+        <>
+          <Rect x="3" y="3" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="12" y="3" width="8" height="8" fill={color} />
+          <Rect x="21" y="3" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="3" y="12" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="12" y="12" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="21" y="12" width="8" height="8" fill={color} fillOpacity={0.6} />
+          <Rect x="3" y="21" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="12" y="21" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+          <Rect x="21" y="21" width="8" height="8" stroke={color} strokeWidth="1.5" fill="none" />
+        </>
+      );
+    case 'stroop':
+      // The letters "RED" overlaid with mismatched color blocks (visualized
+      // as a striped block — we can't easily draw text, so use a
+      // half-and-half rectangle gimmick).
+      return (
+        <>
+          <Rect x="3" y="9" width="13" height="14" fill={color} />
+          <Rect x="16" y="9" width="13" height="14" fill={color} fillOpacity={0.4} />
+          <Line x1="6" y1="13" x2="13" y2="13" stroke="#08080f" strokeWidth="2" />
+          <Line x1="6" y1="16" x2="11" y2="16" stroke="#08080f" strokeWidth="2" />
+          <Line x1="6" y1="19" x2="13" y2="19" stroke="#08080f" strokeWidth="2" />
+          <Line x1="19" y1="13" x2="26" y2="13" stroke={color} strokeWidth="2" />
+          <Line x1="19" y1="16" x2="24" y2="16" stroke={color} strokeWidth="2" />
+          <Line x1="19" y1="19" x2="26" y2="19" stroke={color} strokeWidth="2" />
+        </>
+      );
     case 'minesweep':
       // Cluster of small dots — mimics the in-game field at a glance.
       return (

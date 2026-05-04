@@ -266,7 +266,7 @@ export default function DrawItGame() {
             justifyContent: 'space-between',
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
-            paddingRight: 70, // room for EXIT chip
+            paddingLeft: 44, // room for EXIT chip on the left
           }}
         >
           <View>

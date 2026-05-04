@@ -54,6 +54,14 @@ import { InGameExit } from '../../src/components/InGameExit';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { colors, neon, spacing } from '../../src/theme';
 
+// =====================================================================
+// STREAM DEMO MODE — when true, compresses the difficulty ramp so every
+// obstacle type appears within the first ~20 seconds. Useful for
+// showcase / streaming. Flip to false for normal gameplay.
+const DEMO_MODE = true;
+const DEMO_TIME_SCALE = DEMO_MODE ? 3 : 1;
+// =====================================================================
+
 // ---- Tunables ---------------------------------------------------------
 const TICK_MS = 22;
 
@@ -327,7 +335,11 @@ export default function SlipstreamGame() {
     setScore(Math.round(rawScoreRef.current));
 
     // --- Spawn new content -------------------------------------------
-    spawnIfNeeded(t, holeHeight);
+    // Spawn decisions use the (optionally compressed) effective time so
+    // demo mode pulls all the obstacle types in within ~20 seconds.
+    // Animation phases keep using real `t` so visuals stay smooth.
+    const effSec = t * DEMO_TIME_SCALE;
+    spawnIfNeeded(effSec, holeHeight);
 
     // --- Cull + check collisions -------------------------------------
     const bugPx = BUG_X + bugXOffsetRef.current;
@@ -644,18 +656,19 @@ export default function SlipstreamGame() {
 
   function tunnelChanceFor(elapsedSec: number, wallsSince: number): number {
     if (elapsedSec < 18) return 0;
-    if (wallsSince < 2) return 0; // breathing room between tunnels
-    if (elapsedSec < 35) return 0.15;
-    if (elapsedSec < 60) return 0.24;
-    return 0.28;
+    // Tighter cooldown in demo mode so tunnels actually fire in 20s.
+    if (wallsSince < (DEMO_MODE ? 1 : 2)) return 0;
+    if (elapsedSec < 35) return DEMO_MODE ? 0.30 : 0.15;
+    if (elapsedSec < 60) return DEMO_MODE ? 0.40 : 0.24;
+    return DEMO_MODE ? 0.45 : 0.28;
   }
 
   function mineFieldChanceFor(elapsedSec: number, wallsSince: number): number {
     if (elapsedSec < 25) return 0;
-    if (wallsSince < 4) return 0; // mine fields are rare set-pieces
-    if (elapsedSec < 50) return 0.08;
-    if (elapsedSec < 80) return 0.14;
-    return 0.18;
+    if (wallsSince < (DEMO_MODE ? 2 : 4)) return 0;
+    if (elapsedSec < 50) return DEMO_MODE ? 0.25 : 0.08;
+    if (elapsedSec < 80) return DEMO_MODE ? 0.35 : 0.14;
+    return DEMO_MODE ? 0.40 : 0.18;
   }
 
   function handleTap(_e: GestureResponderEvent) {
@@ -700,7 +713,7 @@ export default function SlipstreamGame() {
               justifyContent: 'space-between',
               paddingHorizontal: spacing.lg,
               paddingVertical: spacing.sm,
-              paddingRight: 70, // room for EXIT chip
+              paddingLeft: 44, // room for EXIT chip on the left
             }}
           >
             <View>

@@ -1,21 +1,37 @@
 // Player state — tokens, identity, stats, daily challenge logic.
-// In-memory for v1; swap the store for AsyncStorage later (single
-// drop-in: persist on every set).
+//
+// Persistence: state is mirrored to AsyncStorage on every change so it
+// survives app cold starts. `loadPlayer()` is called once at boot from
+// the root layout to hydrate state from disk.
 //
 // Token economy:
-//   - Players start with STARTING_TOKENS the first time they open the app.
-//   - DAILY_FREE_TOKENS dropped each calendar day (catch-up cap = 3 days).
+//   - First launch grants STARTING_TOKENS (one-time).
+//   - Daily drop grants WELCOME_DAILY_TOKENS for the first 7 days, then
+//     DAILY_FREE_TOKENS thereafter (catch-up cap = 3 days of stacking).
 //   - Tokens are spent at PRESS START (1 per play, including PLAY AGAIN).
 //   - Each calendar day, ONE cabinet is the "daily challenge" — playing
 //     it that day costs zero tokens. Rotates through the live cabinets.
+//   - Players earn bonus tokens by playing well: see grantPbBonusIfBetter.
 
 import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { games } from './games';
 import { findPromoCode } from './promo-codes';
 
 const STARTING_TOKENS = 50;
 const DAILY_FREE_TOKENS = 50;
+const WELCOME_DAILY_TOKENS = 100; // first 7 days of new accounts
+const WELCOME_DAYS = 7;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// Personal-best reward tiers.
+const PB_BONUS_TOKENS = 5; // any new personal best on a cabinet
+const TOP10_BONUS_TOKENS = 20; // first time you crack the top 10 on a cabinet
+const TOP1_BONUS_TOKENS = 50; // first time you take #1 on a cabinet
+
+// Storage keys — bumped if we ever change the schema in a backwards-
+// incompatible way.
+const STORAGE_KEY = 'ourcade.player.v1';
 
 export type TokenPack = {
   id: string;
@@ -77,36 +93,99 @@ export const TOKEN_PACKS: TokenPack[] = [
 ];
 
 type PlayerState = {
+  /** True once the user has chosen real initials. False on first launch. */
+  initialsChosen: boolean;
   initials: string;
   tokens: number;
   totalPlays: number;
   highScores: number;
   lastFreeGrantAt: number;
+  /** First time the app was opened — drives the 7-day welcome bonus. */
+  firstSeenAt: number;
   redeemedCodes: string[];
+  /** Per-cabinet best score we've credited a PB bonus for (key = gameId). */
+  cabinetBests: Record<string, number>;
+  /** Cabinets where we've already paid the top-10 bonus. */
+  top10Awarded: string[];
+  /** Cabinets where we've already paid the #1 bonus. */
+  top1Awarded: string[];
 };
 
 const initial: PlayerState = {
-  initials: 'DOM',
+  initialsChosen: false,
+  initials: 'AAA',
   tokens: STARTING_TOKENS,
-  totalPlays: 14,
-  highScores: 2,
+  totalPlays: 0,
+  highScores: 0,
   lastFreeGrantAt: 0,
+  firstSeenAt: 0,
   redeemedCodes: [],
+  cabinetBests: {},
+  top10Awarded: [],
+  top1Awarded: [],
 };
 
 let state: PlayerState = { ...initial };
+let hydrated = false;
 const subscribers = new Set<(s: PlayerState) => void>();
+
+function persist() {
+  // Fire-and-forget; we don't block setState on disk writes.
+  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(state)).catch(() => {});
+}
 
 function setState(patch: Partial<PlayerState>) {
   state = { ...state, ...patch };
   subscribers.forEach((fn) => fn(state));
+  if (hydrated) persist();
+}
+
+/**
+ * Hydrate player state from AsyncStorage. Called once at app boot from
+ * `app/_layout.tsx`. After this returns, every setState() also writes
+ * back to disk.
+ */
+export async function loadPlayer(): Promise<void> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<PlayerState>;
+      // Merge into defaults so additions to PlayerState don't break
+      // upgrade paths.
+      state = { ...initial, ...parsed };
+    }
+    if (state.firstSeenAt === 0) {
+      // First launch ever — record it for welcome-bonus tracking.
+      state.firstSeenAt = Date.now();
+    }
+  } catch {
+    /* corrupt or missing — fall back to fresh defaults */
+  }
+  hydrated = true;
+  persist();
+  subscribers.forEach((fn) => fn(state));
+}
+
+/** True if the player has never set their initials. UI uses this to gate. */
+export function needsInitialsSetup(): boolean {
+  return !state.initialsChosen;
+}
+
+function isInWelcomeWindow(now: number): boolean {
+  if (state.firstSeenAt === 0) return true;
+  return now - state.firstSeenAt < WELCOME_DAYS * ONE_DAY_MS;
+}
+
+function dailyDropAmount(now: number): number {
+  return isInWelcomeWindow(now) ? WELCOME_DAILY_TOKENS : DAILY_FREE_TOKENS;
 }
 
 function dueFreeTokens(now: number, lastGrantAt: number): number {
-  if (lastGrantAt === 0) return DAILY_FREE_TOKENS;
+  const drop = dailyDropAmount(now);
+  if (lastGrantAt === 0) return drop;
   const days = Math.floor((now - lastGrantAt) / ONE_DAY_MS);
   if (days <= 0) return 0;
-  return Math.min(days, 3) * DAILY_FREE_TOKENS;
+  return Math.min(days, 3) * drop;
 }
 
 /** Returns the cabinet ID promoted as today's free daily challenge. */
@@ -154,9 +233,17 @@ export function usePlayer() {
 
   return {
     ...snapshot,
+    /** First-launch flag for the initials prompt. */
+    needsInitialsSetup: !snapshot.initialsChosen,
 
-    setInitials: (initials: string) =>
-      setState({ initials: initials.padEnd(3, 'A').slice(0, 3).toUpperCase() }),
+    /** Whether the player is still inside the 7-day welcome window. */
+    inWelcomeWindow: isInWelcomeWindow(Date.now()),
+
+    setInitials: (initials: string, finalize: boolean = true) =>
+      setState({
+        initials: initials.padEnd(3, 'A').slice(0, 3).toUpperCase(),
+        initialsChosen: finalize ? true : state.initialsChosen,
+      }),
 
     /**
      * Try to spend one token to start a play. Returns true on success,
@@ -167,7 +254,6 @@ export function usePlayer() {
     spendTokenFor: (gameId: string): boolean => {
       const isDaily = gameId === getDailyCabinetId();
       if (isDaily) {
-        // Free play — still bump the play counter.
         setState({ totalPlays: state.totalPlays + 1 });
         return true;
       }
@@ -184,7 +270,7 @@ export function usePlayer() {
       setState({ tokens: state.tokens + 1 });
     },
 
-    /** Add tokens (purchase, daily grant, etc.). */
+    /** Add tokens (purchase, daily grant, bonus, etc.). */
     grantTokens: (amount: number) => {
       setState({ tokens: state.tokens + amount });
     },
@@ -234,6 +320,51 @@ export function usePlayer() {
         label: promo.label,
         code: promo.code,
       };
+    },
+
+    /**
+     * Reward a player who just finished a run. Issues bonus tokens for
+     * personal bests and leaderboard milestones (top 10, top 1). Each
+     * bonus is awarded at most once per cabinet for the milestone tiers
+     * to prevent farming. Returns the total bonus granted.
+     *
+     * Score comparison respects "lower is better" games via the
+     * `lowerIsBetter` flag the caller passes in.
+     */
+    grantPbBonusIfBetter: (args: {
+      gameId: string;
+      score: number;
+      rank: number;
+      lowerIsBetter: boolean;
+    }): number => {
+      const prev = state.cabinetBests[args.gameId];
+      const isBetter =
+        prev == null
+          ? true
+          : args.lowerIsBetter
+            ? args.score < prev
+            : args.score > prev;
+
+      let bonus = 0;
+      const patch: Partial<PlayerState> = {};
+
+      if (isBetter) {
+        bonus += PB_BONUS_TOKENS;
+        patch.cabinetBests = { ...state.cabinetBests, [args.gameId]: args.score };
+      }
+      if (args.rank <= 10 && !state.top10Awarded.includes(args.gameId)) {
+        bonus += TOP10_BONUS_TOKENS;
+        patch.top10Awarded = [...state.top10Awarded, args.gameId];
+      }
+      if (args.rank === 1 && !state.top1Awarded.includes(args.gameId)) {
+        bonus += TOP1_BONUS_TOKENS;
+        patch.top1Awarded = [...state.top1Awarded, args.gameId];
+      }
+      if (bonus > 0) {
+        patch.tokens = state.tokens + bonus;
+        setState(patch);
+      }
+      return bonus;
     },
   };
 }

@@ -6,10 +6,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeText } from '../src/components/ArcadeText';
 import { Blink } from '../src/components/Blink';
 import { ScanlineOverlay } from '../src/components/ScanlineOverlay';
+import { usePlayer } from '../src/data/player';
 import { colors, neon, spacing } from '../src/theme';
 
 export default function TitleScreen() {
-  const enter = () => router.replace('/home');
+  const player = usePlayer();
+  // First-launch players get routed through the initials picker.
+  // Existing players land directly on the lobby.
+  const enter = () => {
+    if (player.needsInitialsSetup) {
+      router.replace('/onboarding/initials');
+    } else {
+      router.replace('/home');
+    }
+  };
 
   return (
     <Pressable style={{ flex: 1, backgroundColor: colors.bg }} onPress={enter}>

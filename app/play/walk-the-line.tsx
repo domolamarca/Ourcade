@@ -5,6 +5,12 @@
 // the visible SUBMIT button (or anywhere on the screen) to declare
 // you're done. EXIT chip is always available in the corner.
 //
+// INFINITE MODE: the 10 hand-tuned levels are the warm-up. Past that,
+// procedural walks generate with progressively longer distances and
+// tighter drift tolerances. Strikes accumulate when a level scores
+// below STRIKE_THRESHOLD; 3 strikes ends the run. Players can climb
+// indefinitely — high scores are always toppable.
+//
 // Three modes:
 //   STRAIGHT  — walk N feet in a single direction
 //   RETURN    — walk N feet out, turn 180°, walk back to start
@@ -50,6 +56,13 @@ const ACCENT = neon('cyan');
 const FLASH_MS = 600;
 const TURN_DETECT_DEG = 140;
 
+// Infinite-mode tuning.
+const MAX_STRIKES = 3;
+// A level scoring below this counts as a strike. 600 is ~30% of the
+// 2000 per-level ceiling — lenient enough that one rough walk is
+// recoverable but stacks up if you can't get a feel for the room.
+const STRIKE_THRESHOLD = 600;
+
 // Step-detector tunables.
 const ACCEL_HZ = 25; // sample every 40ms
 const STEP_PEAK_G = 0.16; // amplitude above 1g to count as a candidate peak
@@ -76,18 +89,55 @@ type LevelResult = {
   total: number;
 };
 
+// Procedural level generator for infinite mode.
+function makeProceduralLevel(absLevel: number): Level {
+  // absLevel is 0-indexed. Past WALK_LEVELS.length we generate.
+  const beyond = absLevel - WALK_LEVELS.length; // 0+
+  const modes: Level['mode'][] = ['STRAIGHT', 'RETURN', 'VARIABLE'];
+  const mode = modes[beyond % 3];
+  // Distance grows: 24 ft at first procedural level, +2 ft per level,
+  // capped at 60 ft so it stays achievable indoors.
+  const targetFeet = Math.min(60, 24 + beyond * 2);
+  // Drift tolerance shrinks: -1° per level, floor 12°.
+  const driftTolerance = Math.max(12, 24 - beyond);
+  const variableDeltaFt =
+    mode === 'VARIABLE'
+      ? (Math.random() < 0.5 ? -1 : 1) * (5 + Math.floor(Math.random() * 6))
+      : undefined;
+  const name = `WALK ${absLevel + 1}`;
+  return { name, mode, targetFeet, driftTolerance, variableDeltaFt };
+}
+
 export default function WalkTheLineGame() {
   const [phase, setPhase] = useState<Phase>('permission');
   const [levelIdx, setLevelIdx] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const [lastResult, setLastResult] = useState<LevelResult | null>(null);
   const [flashTargetFt, setFlashTargetFt] = useState<number | null>(null);
+  const [strikes, setStrikes] = useState(0);
   // Live step count, surfaced ONLY for hot debugging if we ever expose it.
   const [, setLiveSteps] = useState(0);
 
   const phaseRef = useRef<Phase>('permission');
   const totalScoreRef = useRef(0);
   const levelIdxRef = useRef(0);
+  const strikesRef = useRef(0);
+  // Procedural levels are cached so a level shown in the briefing matches
+  // what the engine uses during the walk.
+  const proceduralLevelsRef = useRef<Level[]>([]);
+
+  function getLevel(idx: number): Level {
+    if (idx < WALK_LEVELS.length) return WALK_LEVELS[idx];
+    const procIdx = idx - WALK_LEVELS.length;
+    while (proceduralLevelsRef.current.length <= procIdx) {
+      proceduralLevelsRef.current.push(
+        makeProceduralLevel(
+          proceduralLevelsRef.current.length + WALK_LEVELS.length,
+        ),
+      );
+    }
+    return proceduralLevelsRef.current[procIdx];
+  }
 
   const finalTargetFtRef = useRef(0);
   const startYawRef = useRef<number | null>(null);
@@ -207,7 +257,7 @@ export default function WalkTheLineGame() {
   }
 
   function onStepCounted(steps: number) {
-    const lvl = WALK_LEVELS[levelIdxRef.current];
+    const lvl = getLevel(levelIdxRef.current);
     if (lvl.mode === 'VARIABLE' && !variableTriggeredRef.current) {
       const halfSteps = Math.floor(feetToSteps(lvl.targetFeet) / 2);
       if (steps >= halfSteps) {
@@ -222,7 +272,7 @@ export default function WalkTheLineGame() {
   function onYawUpdate(yawDeg: number) {
     if (phaseRef.current !== 'walking' || startYawRef.current === null) return;
     const drift = Math.abs(angDelta(yawDeg, startYawRef.current));
-    const lvl = WALK_LEVELS[levelIdxRef.current];
+    const lvl = getLevel(levelIdxRef.current);
     if (lvl.mode === 'RETURN') {
       if (!turnedAroundRef.current && drift > TURN_DETECT_DEG) {
         turnedAroundRef.current = true;
@@ -250,7 +300,7 @@ export default function WalkTheLineGame() {
 
   // ---------- Phase transitions ---------------------------------------
   function beginLevel() {
-    const lvl = WALK_LEVELS[levelIdxRef.current];
+    const lvl = getLevel(levelIdxRef.current);
     finalTargetFtRef.current = lvl.targetFeet;
     startYawRef.current = null;
     peakDriftRef.current = 0;
@@ -266,7 +316,7 @@ export default function WalkTheLineGame() {
   function declareDone() {
     if (phaseRef.current !== 'walking' && phaseRef.current !== 'flash') return;
     stopSensors();
-    const lvl = WALK_LEVELS[levelIdxRef.current];
+    const lvl = getLevel(levelIdxRef.current);
     const drift = peakDriftRef.current;
     const totalSteps = totalStepsRef.current;
     const targetFt = finalTargetFtRef.current;
@@ -306,6 +356,13 @@ export default function WalkTheLineGame() {
     setLastResult(result);
     totalScoreRef.current += total;
     setTotalScore(totalScoreRef.current);
+
+    // Strikes — a flubbed walk costs you. 3 strikes ends the run.
+    if (total < STRIKE_THRESHOLD) {
+      strikesRef.current += 1;
+      setStrikes(strikesRef.current);
+    }
+
     setPhaseSafe('result');
 
     Haptics.notificationAsync(
@@ -318,15 +375,16 @@ export default function WalkTheLineGame() {
   }
 
   function advanceFromResult() {
-    const next = levelIdxRef.current + 1;
-    if (next >= WALK_LEVELS.length) {
+    // Infinite progression: keep walking as long as you have strikes left.
+    if (strikesRef.current >= MAX_STRIKES) {
       setPhaseSafe('all-done');
       resultTimeoutRef.current = setTimeout(() => finalize(), 1600);
-    } else {
-      levelIdxRef.current = next;
-      setLevelIdx(next);
-      setPhaseSafe('briefing');
+      return;
     }
+    const next = levelIdxRef.current + 1;
+    levelIdxRef.current = next;
+    setLevelIdx(next);
+    setPhaseSafe('briefing');
   }
 
   function finalize() {
@@ -340,7 +398,7 @@ export default function WalkTheLineGame() {
   }
 
   // ---------- Render --------------------------------------------------
-  const lvl = WALK_LEVELS[levelIdxRef.current];
+  const lvl = getLevel(levelIdxRef.current);
 
   if (phase === 'permission') {
     return (
@@ -455,6 +513,7 @@ export default function WalkTheLineGame() {
             justifyContent: 'space-between',
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
+            paddingLeft: 44, // room for EXIT chip on the left
           }}
         >
           <View>
@@ -462,10 +521,31 @@ export default function WalkTheLineGame() {
               {'LEVEL'}
             </ArcadeText>
             <ArcadeText variant="mono" size={20} color={ACCENT} glowColor={ACCENT}>
-              {`L${levelIdx + 1}/${WALK_LEVELS.length}`}
+              {`L${levelIdx + 1}`}
             </ArcadeText>
             <ArcadeText variant="pixel" size={7} color={colors.textDim}>
               {lvl.name}
+            </ArcadeText>
+          </View>
+          <View style={{ alignItems: 'center' }}>
+            <ArcadeText variant="pixel" size={7} color={colors.textMute}>
+              {'STRIKES'}
+            </ArcadeText>
+            <View style={{ flexDirection: 'row', gap: 4, marginTop: 2 }}>
+              {[0, 1, 2].map((i) => (
+                <ArcadeText
+                  key={i}
+                  variant="pixel"
+                  size={16}
+                  color={strikes > i ? neon('red') : colors.textMute}
+                  glowColor={strikes > i ? neon('red') : undefined}
+                >
+                  {'X'}
+                </ArcadeText>
+              ))}
+            </View>
+            <ArcadeText variant="pixel" size={7} color={colors.textDim}>
+              {`<${STRIKE_THRESHOLD} = STRIKE`}
             </ArcadeText>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
@@ -628,7 +708,7 @@ export default function WalkTheLineGame() {
                 color={ACCENT}
                 glowColor={ACCENT}
               >
-                {levelIdxRef.current + 1 >= WALK_LEVELS.length
+                {strikesRef.current >= MAX_STRIKES
                   ? 'FINISH ▶'
                   : 'NEXT  WALK ▶'}
               </ArcadeText>
@@ -637,21 +717,25 @@ export default function WalkTheLineGame() {
         </View>
       ) : null}
 
-      {/* ALL DONE */}
+      {/* ALL DONE — 3 strikes ended the run */}
       {phase === 'all-done' ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Blink intervalMs={420} minOpacity={0.4}>
+          <Blink intervalMs={300} minOpacity={0.4}>
             <ArcadeText
               variant="pixel"
               size={22}
-              color={neon('yellow')}
-              glowColor={neon('yellow')}
+              color={neon('red')}
+              glowColor={neon('red')}
               glowRadius={18}
               align="center"
             >
-              {'!! WALK COMPLETE !!'}
+              {'GAME  OVER'}
             </ArcadeText>
           </Blink>
+          <View style={{ height: spacing.xs }} />
+          <ArcadeText variant="pixel" size={9} color={colors.textMute}>
+            {`3 STRIKES · L${levelIdx + 1} REACHED`}
+          </ArcadeText>
           <View style={{ height: spacing.md }} />
           <ArcadeText variant="pixel" size={9} color={colors.textMute}>
             {'FINAL SCORE'}

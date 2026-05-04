@@ -397,7 +397,7 @@ export default function TriviaGame() {
             justifyContent: 'space-between',
             paddingHorizontal: spacing.lg,
             paddingVertical: spacing.sm,
-            paddingRight: 70, // room for the EXIT chip
+            paddingLeft: 44, // room for the EXIT chip on the left
           }}
         >
           <View>

@@ -13,18 +13,23 @@
 //   row above player + player row + row below player
 //   action buttons
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
 import { HighScoreRow } from '../../src/components/HighScoreRow';
-import { InitialsEntry } from '../../src/components/InitialsEntry';
 import { NeonFrame } from '../../src/components/NeonFrame';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
 import { getGame } from '../../src/data/games';
-import { rankPlayerScore, Score } from '../../src/data/leaderboard';
+import {
+  isLowerBetter,
+  rankPlayerScore,
+  Score,
+  submitScore,
+} from '../../src/data/leaderboard';
 import { usePlayer } from '../../src/data/player';
 import { colors, neon, spacing } from '../../src/theme';
 
@@ -75,10 +80,42 @@ export default function ResultScreen() {
   const isHigh = placement.playerRank === 1;
   const isTop10 = placement.playerRank <= 10;
 
-  const submit = () => {
-    setSubmitted(true);
-    // TODO: Supabase write happens here once backend is wired.
-  };
+  // Auto-submit on mount + grant any earned bonus tokens. Each cabinet
+  // can pay a personal-best bonus (any new best), a top-10 bonus (first
+  // time cracking #10), and a top-1 bonus (first time taking #1).
+  const submitFiredRef = useRef(false);
+  const [bonusEarned, setBonusEarned] = useState(0);
+  useEffect(() => {
+    if (submitFiredRef.current) return;
+    submitFiredRef.current = true;
+
+    const bonus = player.grantPbBonusIfBetter({
+      gameId: game.id,
+      score,
+      rank: placement.playerRank,
+      lowerIsBetter: isLowerBetter(game.id),
+    });
+    if (bonus > 0) {
+      setBonusEarned(bonus);
+      Haptics.notificationAsync(
+        Haptics.NotificationFeedbackType.Success,
+      ).catch(() => {});
+    }
+
+    submitScore({
+      gameId: game.id,
+      initials: player.initials,
+      score,
+      unit: game.unit,
+      level,
+      taps,
+    })
+      .then((result) => {
+        if (result.ok) setSubmitted(true);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // PLAY AGAIN charges a token (or is free if this is today's daily).
   // Insufficient → routes to /shop. Live games go straight to their
@@ -98,6 +135,8 @@ export default function ResultScreen() {
     else if (game.id === 'trivia') router.replace('/play/trivia');
     else if (game.id === 'draw-it') router.replace('/play/draw-it');
     else if (game.id === 'pulse') router.replace('/play/pulse');
+    else if (game.id === 'memory-grid') router.replace('/play/memory-grid');
+    else if (game.id === 'stroop') router.replace('/play/stroop');
     else router.replace({ pathname: '/game/[id]', params: { id: game.id } });
   };
 
@@ -162,6 +201,33 @@ export default function ResultScreen() {
           <ArcadeText variant="pixel" size={10} color={colors.textDim}>
             {game.unit}
           </ArcadeText>
+          {bonusEarned > 0 ? (
+            <View style={{ marginTop: spacing.sm, alignItems: 'center' }}>
+              <NeonFrame
+                color={neon('green')}
+                thickness={2}
+                padding={spacing.sm}
+                glow
+              >
+                <ArcadeText
+                  variant="pixel"
+                  size={11}
+                  color={neon('green')}
+                  glowColor={neon('green')}
+                >
+                  {`+${bonusEarned} TOKENS  ★`}
+                </ArcadeText>
+              </NeonFrame>
+              <View style={{ height: 4 }} />
+              <ArcadeText variant="pixel" size={7} color={colors.textMute}>
+                {placement.playerRank === 1
+                  ? 'WORLD RECORD BONUS'
+                  : placement.playerRank <= 10
+                    ? 'TOP 10 BONUS'
+                    : 'PERSONAL BEST'}
+              </ArcadeText>
+            </View>
+          ) : null}
           {duration != null ? (
             <View style={{ marginTop: spacing.sm }}>
               <ArcadeText variant="pixel" size={8} color={colors.textMute}>
@@ -171,32 +237,6 @@ export default function ResultScreen() {
           ) : null}
         </View>
 
-        {/* Initials entry — only shown for the very top score */}
-        {isHigh && !submitted ? (
-          <View style={{ alignItems: 'center', marginVertical: spacing.lg }}>
-            <ArcadeText variant="pixel" size={10} color={neon('yellow')}>
-              {'ENTER  YOUR  INITIALS'}
-            </ArcadeText>
-            <View style={{ height: spacing.lg }} />
-            <InitialsEntry
-              initial={player.initials}
-              onChange={(v) => player.setInitials(v)}
-            />
-            <View style={{ height: spacing.lg }} />
-            <Pressable onPress={submit}>
-              <NeonFrame color={neon('green')} thickness={2} padding={spacing.md} glow>
-                <ArcadeText
-                  variant="pixel"
-                  size={12}
-                  color={neon('green')}
-                  glowColor={neon('green')}
-                >
-                  {'SUBMIT >>'}
-                </ArcadeText>
-              </NeonFrame>
-            </Pressable>
-          </View>
-        ) : null}
 
         {/* Rank readout */}
         <View style={{ alignItems: 'center', marginTop: spacing.md, marginBottom: spacing.sm }}>

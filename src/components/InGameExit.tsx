@@ -47,26 +47,31 @@ export function InGameExit({ message, topOffset = 4 }: Props) {
       pointerEvents="box-none"
       style={{
         position: 'absolute',
+        // Top-left, compact icon. Wider chip earlier kept overlapping
+        // timer bars and HUD readouts on different cabinets.
         top: insets.top + topOffset,
-        right: 10,
+        left: 8,
         zIndex: 100,
         elevation: 100,
       }}
     >
       <Pressable
         onPress={confirm}
-        hitSlop={20}
+        hitSlop={18}
         style={({ pressed }) => ({
           opacity: pressed ? 0.5 : 1,
-          paddingHorizontal: 12,
-          paddingVertical: 8,
+          width: 30,
+          height: 30,
+          borderRadius: 15,
+          alignItems: 'center',
+          justifyContent: 'center',
           backgroundColor: 'rgba(8,8,15,0.92)',
           borderWidth: 1,
           borderColor: colors.textMute,
         })}
       >
-        <ArcadeText variant="pixel" size={10} color={colors.text}>
-          {'EXIT  ✕'}
+        <ArcadeText variant="pixel" size={11} color={colors.text}>
+          {'✕'}
         </ArcadeText>
       </Pressable>
     </View>

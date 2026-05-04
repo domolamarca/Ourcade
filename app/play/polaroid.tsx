@@ -323,6 +323,7 @@ export default function PolaroidGame() {
               justifyContent: 'space-between',
               paddingHorizontal: spacing.lg,
               paddingVertical: spacing.sm,
+              paddingLeft: 44, // room for EXIT chip on the left
             }}
           >
             <View style={hudCardStyle}>
