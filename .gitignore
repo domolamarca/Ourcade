@@ -12,3 +12,7 @@ expo-env.d.ts
 # Raw audio packs — keep only the role-renamed files in assets/audio/
 assets/audio/_kenney/
 assets/audio/.DS_Store
+
+# App Store Connect API keys — NEVER commit, these are credentials
+*.p8
+AuthKey_*

@@ -12,7 +12,6 @@
     "@expo-google-fonts/press-start-2p": "*",
     "@expo-google-fonts/vt323": "*",
     "@react-native-async-storage/async-storage": "2.1.2",
-    "@sentry/react-native": "~6.18.0",
     "@supabase/supabase-js": "^2.49.0",
     "expo": "~54.0.0",
     "expo-asset": "~12.0.12",

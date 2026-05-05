@@ -1,6 +1,13 @@
 // Sentry crash + error reporting configuration.
 //
-// To wire up:
+// v1.0 ships WITHOUT Sentry. The @sentry/react-native@6.x SDK uses
+// older Hermes profiler APIs (enableSamplingProfiler / etc.) that
+// were renamed in RN 0.74+, which breaks iOS builds against RN 0.81's
+// engine. Until @sentry/react-native@7.x is wired (planned for v1.1),
+// `sentry.ts` lazy-requires the package and falls back to no-ops if
+// it's missing.
+//
+// To wire up in v1.1:
 //   1. Create a free account at https://sentry.io (free tier covers
 //      5,000 errors/month — plenty for indie launch).
 //   2. Create a new project: Platform = "React Native", give it any
@@ -8,15 +15,10 @@
 //   3. Sentry shows you a DSN that looks like:
 //        https://abc123def456@o7654321.ingest.us.sentry.io/1234567
 //      Paste it into SENTRY_DSN below.
-//   4. From your terminal:
-//        npm install
+//   4. Reinstall the SDK at a Hermes-compatible version:
+//        npm install @sentry/react-native@^7
 //        npx expo prebuild --clean
 //        eas build --platform ios
-//      (Sentry has a native module — needs a fresh dev client build.)
-//
-// While SENTRY_DSN is the empty string, the wrapper in sentry.ts is
-// a silent no-op. You can ship without it; just no crashes get
-// reported to the dashboard until you swap in a real DSN.
 
 export const SENTRY_DSN = '';
 
