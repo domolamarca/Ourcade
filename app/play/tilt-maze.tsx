@@ -208,9 +208,13 @@ export default function TiltMazeGame() {
 
     // --- Apply tile effects ------------------------------------------
     // Tile is an oriented rectangle along the path tangent. Ball is "on
-    // tile" if its projection along the local tangent is within ±length/2
-    // of the tile center. We don't check perpendicular distance — the
-    // path-proximity step already enforces the ball is on the path.
+    // tile" if both its tangent-projection AND its perpendicular-
+    // projection from the tile center are within range. The earlier
+    // version only checked the tangent axis on the assumption that
+    // "the ball is already on the path" — but on zigzag levels the
+    // path passes through the same x/y range multiple times on
+    // different rows, so a tile on row 1 was firing for the ball on
+    // row 2 (same x, very different y).
     const tiles = lvl.tiles ?? [];
     let onBoost = false;
     let onSlow = false;
@@ -220,6 +224,13 @@ export default function TiltMazeGame() {
       const dy = ball.y - t.pos.y;
       const along = dx * tan.tx + dy * tan.ty;
       if (Math.abs(along) > t.length / 2 + 4) continue;
+      // Perpendicular distance from the tile center across the tile's
+      // short axis. Must be inside the rendered tile width plus a
+      // small tolerance, otherwise the ball is on a different segment
+      // of the path that happens to share an axis with this tile.
+      const perp = -dx * tan.ty + dy * tan.tx;
+      const halfW = pathHalfWidthAt(t.pos, lvl.path, lvl.width);
+      if (Math.abs(perp) > halfW + 4) continue;
       if (t.kind === 'boost') {
         onBoost = true;
         const speed = Math.hypot(ball.vx, ball.vy);
