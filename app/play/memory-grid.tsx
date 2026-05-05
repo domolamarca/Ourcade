@@ -23,6 +23,7 @@ import { ArcadeText } from '../../src/components/ArcadeText';
 import { Blink } from '../../src/components/Blink';
 import { InGameExit } from '../../src/components/InGameExit';
 import { ScanlineOverlay } from '../../src/components/ScanlineOverlay';
+import { playSfx } from '../../src/lib/sound';
 import { colors, neon, spacing } from '../../src/theme';
 
 const SHOW_MS_BASE = 600;
@@ -136,6 +137,10 @@ export default function MemoryGridGame() {
     }
     setActiveIdx(sequenceRef.current[stepIdx]);
     Haptics.selectionAsync().catch(() => {});
+    // Each cell flash gets the same blip the player will use when
+    // tapping it back — Simon-style audio reinforcement so the brain
+    // learns the rhythm of the sequence, not just the visual order.
+    playSfx('hit');
     const showMs = clamp(
       SHOW_MS_BASE - roundRef.current * 22,
       SHOW_MS_MIN,
@@ -160,6 +165,8 @@ export default function MemoryGridGame() {
       inputIdxRef.current = next;
       setInputProgress(next);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      // Same blip as the showing phase — reinforces the audio match.
+      playSfx('hit');
 
       if (next >= sequenceRef.current.length) {
         // Round cleared.
@@ -167,6 +174,9 @@ export default function MemoryGridGame() {
         scoreRef.current += points;
         setScore(scoreRef.current);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+        // Round-cleared chime overrides the trailing 'hit' so the
+        // moment of progress lands as a discrete event.
+        playSfx('streak');
         setPhaseSafe('correct');
         pushTimer(
           setTimeout(() => armRound(roundRef.current + 1), ROUND_TRANSITION_MS),
@@ -176,6 +186,7 @@ export default function MemoryGridGame() {
       // Wrong.
       setFlashIdx({ idx, color: FAIL });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      playSfx('miss');
       setPhaseSafe('gameover');
       pushTimer(setTimeout(() => finalize(), GAMEOVER_HOLD_MS));
     }
