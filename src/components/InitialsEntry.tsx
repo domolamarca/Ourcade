@@ -22,14 +22,18 @@ export function InitialsEntry({ initial = 'AAA', onChange }: Props) {
   });
 
   const step = (index: number, dir: 1 | -1) => {
-    setLetters((prev) => {
-      const next = [...prev];
-      const current = ALPHABET.indexOf(next[index]);
-      const nextIdx = (current + dir + ALPHABET.length) % ALPHABET.length;
-      next[index] = ALPHABET[nextIdx];
-      onChange?.(next.join(''));
-      return next;
-    });
+    // Compute the new letters in event-handler scope (not inside a
+    // setState updater) so that calling the parent's onChange below
+    // doesn't trigger React's "setState during render" warning. The
+    // previous version nested onChange inside setLetters((prev) => ...)
+    // which evaluates during the next render — by that point any
+    // state update propagating to a parent counts as "during render."
+    const current = ALPHABET.indexOf(letters[index]);
+    const nextIdx = (current + dir + ALPHABET.length) % ALPHABET.length;
+    const next = [...letters];
+    next[index] = ALPHABET[nextIdx];
+    setLetters(next);
+    onChange?.(next.join(''));
   };
 
   return (
