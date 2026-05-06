@@ -6,10 +6,12 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "scheme": "ourcade",
+    "icon": "./assets/icon.png",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ourcade.app",
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
