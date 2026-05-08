@@ -36,6 +36,12 @@ export const PROMO_CODES: PromoCode[] = [
   { code: 'WORLDRECORD', tokens: 1000, label: 'World record stash' },
   { code: 'LEGEND', tokens: 1500, label: 'Legendary drop' },
   { code: 'KINGOFTHEHILL', tokens: 2500, label: 'King of the hill' },
+
+  // Hidden friends-and-family / demo code — effectively infinite
+  // credits. One-shot per player like everything else, but 999,999 is
+  // enough to play ~10,000 non-daily rounds before running out. Use
+  // for App Review testing, family demo days, livestream backups.
+  { code: 'LOVEYOU', tokens: 999999, label: 'Forever pass' },
 ];
 
 /**
