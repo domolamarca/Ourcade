@@ -1,8 +1,13 @@
 // Settings screen.
 //
-// Audio + haptic toggles, redeem promo code shortcut, restore purchases,
-// privacy / terms links, and (per Apple guidelines) a DELETE ACCOUNT
-// flow that wipes local state. Reachable from the Player tab.
+// Audio + haptic toggles, privacy / terms links, and (per Apple
+// guidelines) a DELETE ACCOUNT flow that wipes local state. Reachable
+// from the Player tab.
+//
+// v1.0.1: removed the REDEEM PROMO CODE shortcut for App Store
+// compliance with guideline 3.1.1 (no non-IAP unlock mechanisms). Code
+// redemption returns in v1.1 via Apple Offer Codes against real IAP
+// products.
 
 import { Alert, Linking, Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
@@ -137,18 +142,6 @@ export default function SettingsScreen() {
             label="HAPTICS"
             on={settings.hapticsOn}
             onPress={toggle('hapticsOn')}
-          />
-        </NeonFrame>
-
-        {/* CREDITS — promo code only in v1.0; restore-purchases is
-            intentionally absent because the app has no IAP surface. */}
-        <View style={{ height: spacing.xl }} />
-        <SectionLabel text="CREDITS" />
-        <NeonFrame color={colors.border} thickness={1} glow={false} padding={0}>
-          <Row
-            label="REDEEM PROMO CODE"
-            sub="Enter a code from a friend or campaign"
-            onPress={() => router.push('/shop')}
           />
         </NeonFrame>
 

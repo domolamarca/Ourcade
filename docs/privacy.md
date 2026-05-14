@@ -26,7 +26,6 @@ servers):
 - Personal-best scores per cabinet
 - Tutorial-seen flags
 - Audio and haptic preferences
-- Promo codes you have redeemed
 
 **Sent to our leaderboard service** (Supabase) so global rankings work:
 

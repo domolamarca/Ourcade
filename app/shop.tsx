@@ -1,15 +1,19 @@
 // Credit shop.
 //
 // v1.0 ships without any in-app purchases — credits come exclusively
-// from daily drops, the welcome bonus, personal-best bonuses, and
-// promo codes. The pack-store UI is intentionally not rendered (we
-// keep TOKEN_PACKS in player.ts so v1.1 can re-enable it without a
-// data-model change). This screen now offers two surfaces:
-//   1. Daily drop claim (free credits the welcome window grants).
-//   2. Promo code redemption (codes mint free credits — no real money).
+// from gameplay: the welcome bonus, the daily free drop, daily-challenge
+// plays, and personal-best / leaderboard bonuses. The pack-store UI is
+// intentionally not rendered (TOKEN_PACKS still lives in player.ts so
+// v1.1 can re-enable it without a data-model change).
+//
+// v1.0.1: promo code redemption removed for App Store compliance with
+// guideline 3.1.1 (any mechanism that unlocks app functionality outside
+// IAP isn't allowed, regardless of whether money changes hands). When
+// IAPs land in v1.1, code redemption returns via Apple Offer Codes
+// against a real IAP product.
 
-import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import React from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -17,51 +21,11 @@ import { ArcadeText } from '../src/components/ArcadeText';
 import { NeonFrame } from '../src/components/NeonFrame';
 import { ScanlineOverlay } from '../src/components/ScanlineOverlay';
 import { usePlayer } from '../src/data/player';
-import { colors, fonts, neon, spacing } from '../src/theme';
-
-type CodeFeedback =
-  | { kind: 'idle' }
-  | { kind: 'success'; tokens: number; label: string; code: string }
-  | { kind: 'invalid' }
-  | { kind: 'used' };
+import { colors, neon, spacing } from '../src/theme';
 
 export default function Shop() {
   const player = usePlayer();
   const pendingFree = player.pendingFreeTokens();
-
-  // Promo code state
-  const [codeInput, setCodeInput] = useState('');
-  const [feedback, setFeedback] = useState<CodeFeedback>({ kind: 'idle' });
-  const inputRef = useRef<TextInput>(null);
-
-  function redeem() {
-    const trimmed = codeInput.trim();
-    if (!trimmed) return;
-    const result = player.redeemPromoCode(trimmed);
-    if (result.ok) {
-      setFeedback({
-        kind: 'success',
-        tokens: result.tokens,
-        label: result.label,
-        code: result.code,
-      });
-      setCodeInput('');
-      inputRef.current?.blur();
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Success,
-      ).catch(() => {});
-    } else if (result.reason === 'used') {
-      setFeedback({ kind: 'used' });
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Warning,
-      ).catch(() => {});
-    } else {
-      setFeedback({ kind: 'invalid' });
-      Haptics.notificationAsync(
-        Haptics.NotificationFeedbackType.Error,
-      ).catch(() => {});
-    }
-  }
 
   function claimFree() {
     const granted = player.claimDailyIfDue();
@@ -88,7 +52,7 @@ export default function Shop() {
         >
           <View>
             <ArcadeText variant="pixel" size={9} color={colors.textMute}>
-              {'>> SHOP'}
+              {'>> CREDITS'}
             </ArcadeText>
             <View style={{ height: 4 }} />
             <ArcadeText
@@ -97,7 +61,7 @@ export default function Shop() {
               color={neon('yellow')}
               glowColor={neon('yellow')}
             >
-              {'CREDITS'}
+              {'BALANCE'}
             </ArcadeText>
           </View>
           <Pressable onPress={() => router.back()}>
@@ -206,115 +170,31 @@ export default function Shop() {
             </View>
           )}
 
-          {/* Promo code redemption */}
+          {/* How to earn — quick reference so players know the credit
+              economy at a glance. */}
           <View style={{ marginTop: spacing.xl, marginBottom: spacing.sm }}>
             <ArcadeText variant="pixel" size={9} color={colors.textMute}>
-              {'>> REDEEM CODE'}
+              {'>> HOW TO EARN'}
             </ArcadeText>
           </View>
-          <NeonFrame
-            color={
-              feedback.kind === 'success'
-                ? neon('green')
-                : feedback.kind === 'invalid' || feedback.kind === 'used'
-                  ? neon('red')
-                  : neon('cyan')
-            }
-            thickness={2}
-            padding={spacing.md}
-            glow={feedback.kind === 'success'}
-          >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: spacing.sm,
-              }}
-            >
-              <TextInput
-                ref={inputRef}
-                value={codeInput}
-                onChangeText={(text) => {
-                  setCodeInput(text.toUpperCase());
-                  if (feedback.kind !== 'idle') setFeedback({ kind: 'idle' });
-                }}
-                onSubmitEditing={redeem}
-                returnKeyType="go"
-                autoCapitalize="characters"
-                autoCorrect={false}
-                placeholder="ENTER CODE"
-                placeholderTextColor={colors.textMute}
-                style={{
-                  flex: 1,
-                  fontFamily: fonts.mono,
-                  fontSize: 20,
-                  color: colors.text,
-                  letterSpacing: 2,
-                  paddingVertical: spacing.xs,
-                  paddingHorizontal: spacing.sm,
-                  backgroundColor: 'rgba(0,0,0,0.3)',
-                  borderWidth: 1,
-                  borderColor: colors.border,
-                }}
-              />
-              <Pressable onPress={redeem} disabled={!codeInput.trim()}>
-                <View
-                  style={{
-                    paddingHorizontal: spacing.md,
-                    paddingVertical: spacing.sm,
-                    backgroundColor: codeInput.trim() ? neon('cyan') : colors.bgElevated,
-                  }}
-                >
-                  <ArcadeText
-                    variant="pixel"
-                    size={11}
-                    color={codeInput.trim() ? colors.bg : colors.textMute}
-                  >
-                    {'REDEEM'}
-                  </ArcadeText>
-                </View>
-              </Pressable>
-            </View>
-
-            {/* Feedback line */}
+          <NeonFrame color={colors.border} thickness={1} padding={spacing.md}>
+            <EarnRow label="DAILY DROP" detail="+50 EVERY 24H" />
             <View style={{ height: spacing.sm }} />
-            {feedback.kind === 'success' ? (
-              <View>
-                <ArcadeText
-                  variant="pixel"
-                  size={10}
-                  color={neon('green')}
-                  glowColor={neon('green')}
-                >
-                  {`+${feedback.tokens} CREDITS  ★`}
-                </ArcadeText>
-                <View style={{ height: 4 }} />
-                <ArcadeText variant="mono" size={13} color={colors.textDim}>
-                  {`${feedback.code} — ${feedback.label}`}
-                </ArcadeText>
-              </View>
-            ) : feedback.kind === 'invalid' ? (
-              <ArcadeText variant="pixel" size={9} color={neon('red')} glowColor={neon('red')}>
-                {'INVALID CODE'}
-              </ArcadeText>
-            ) : feedback.kind === 'used' ? (
-              <ArcadeText variant="pixel" size={9} color={neon('red')} glowColor={neon('red')}>
-                {'CODE ALREADY USED'}
-              </ArcadeText>
-            ) : (
-              <ArcadeText variant="pixel" size={8} color={colors.textMute}>
-                {'CHECK SOCIAL FOR DROPS · CODES VARY 25–2,500 CREDITS'}
-              </ArcadeText>
-            )}
+            <EarnRow label="WELCOME WEEK" detail="2X DAILY · FIRST 7 DAYS" />
+            <View style={{ height: spacing.sm }} />
+            <EarnRow label="DAILY CHALLENGE" detail="FREE PLAY · ROTATES DAILY" />
+            <View style={{ height: spacing.sm }} />
+            <EarnRow label="PERSONAL BEST" detail="+5 PER CABINET" />
+            <View style={{ height: spacing.sm }} />
+            <EarnRow label="TOP 10 FINISH" detail="+20 FIRST TIME / CABINET" />
+            <View style={{ height: spacing.sm }} />
+            <EarnRow label="#1 FINISH" detail="+50 FIRST TIME / CABINET" />
           </NeonFrame>
 
-          {/* Footer note — daily drops + promo codes are the credit
-              economy in v1.0. Pack store deliberately not rendered
-              (Apple guideline 2.3.1 disallows preview of features
-              that aren't yet enabled). */}
+          {/* Footer note */}
           <View style={{ marginTop: spacing.xl, alignItems: 'center' }}>
             <ArcadeText variant="pixel" size={9} color={colors.textMute} align="center">
-              {'DAILY DROPS + PROMO CODES'}
+              {'PLAY WELL · EARN MORE'}
             </ArcadeText>
             <View style={{ height: 4 }} />
             <ArcadeText variant="pixel" size={7} color={colors.textMute} align="center">
@@ -325,6 +205,25 @@ export default function Shop() {
 
         <ScanlineOverlay opacity={0.04} />
       </SafeAreaView>
+    </View>
+  );
+}
+
+function EarnRow({ label, detail }: { label: string; detail: string }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <ArcadeText variant="pixel" size={10} color={colors.text}>
+        {label}
+      </ArcadeText>
+      <ArcadeText variant="mono" size={12} color={colors.textDim}>
+        {detail}
+      </ArcadeText>
     </View>
   );
 }

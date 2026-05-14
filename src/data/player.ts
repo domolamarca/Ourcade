@@ -16,7 +16,6 @@
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { games } from './games';
-import { findPromoCode } from './promo-codes';
 
 const STARTING_TOKENS = 50;
 const DAILY_FREE_TOKENS = 50;
@@ -111,6 +110,10 @@ type PlayerState = {
   lastFreeGrantAt: number;
   /** First time the app was opened — drives the 7-day welcome bonus. */
   firstSeenAt: number;
+  /** Legacy field from v1.0 — promo redemption was removed in v1.0.1 for
+   *  App Store compliance with guideline 3.1.1. We keep the field in the
+   *  type so existing AsyncStorage payloads still hydrate cleanly; new
+   *  installs start with an empty array and nothing ever pushes to it. */
   redeemedCodes: string[];
   /** Per-cabinet best score we've credited a PB bonus for (key = gameId). */
   cabinetBests: Record<string, number>;
@@ -397,33 +400,6 @@ export function usePlayer() {
       state = { ...initial, settings: { ...defaultSettings }, firstSeenAt: Date.now() };
       subscribers.forEach((fn) => fn(state));
       persist();
-    },
-
-    /**
-     * Try to redeem a promo code. Returns one of:
-     *   { ok: true, tokens, label } — granted (also updates state)
-     *   { ok: false, reason: 'invalid' | 'used' }
-     */
-    redeemPromoCode: (
-      input: string,
-    ):
-      | { ok: true; tokens: number; label: string; code: string }
-      | { ok: false; reason: 'invalid' | 'used' } => {
-      const promo = findPromoCode(input);
-      if (!promo) return { ok: false, reason: 'invalid' };
-      if (state.redeemedCodes.includes(promo.code)) {
-        return { ok: false, reason: 'used' };
-      }
-      setState({
-        tokens: state.tokens + promo.tokens,
-        redeemedCodes: [...state.redeemedCodes, promo.code],
-      });
-      return {
-        ok: true,
-        tokens: promo.tokens,
-        label: promo.label,
-        code: promo.code,
-      };
     },
 
     /**

@@ -103,8 +103,8 @@ export default function ProfileScreen() {
           </NeonFrame>
         </Pressable>
 
-        {/* Settings — sound, haptics, promo code, legal, delete account.
-            Moved above sensor status so the most-used utility surface
+        {/* Settings — sound, haptics, legal, delete account. Moved
+            above sensor status so the most-used utility surface
             (toggles + account) is closer to the top of the page. */}
         <View style={{ height: spacing.xl }} />
         <Pressable onPress={() => router.push('/settings')}>

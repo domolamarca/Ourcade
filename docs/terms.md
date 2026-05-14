@@ -28,9 +28,9 @@ Credits are a virtual currency used inside Ourcade to start non-daily
 plays. They have **no real-world value**, cannot be redeemed for cash,
 and cannot be transferred between accounts.
 
-Credits are granted via the daily drop, the welcome bonus, personal-
-best bonuses, and promo codes. All grants are gifts and can be revoked
-or rebalanced at any time.
+Credits are granted via the daily drop, the welcome bonus, and
+personal-best bonuses (including top-10 and #1 leaderboard rewards).
+All grants are gifts and can be revoked or rebalanced at any time.
 
 ## 3. Leaderboards and code of conduct
 

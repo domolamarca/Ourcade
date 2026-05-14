@@ -57,17 +57,18 @@ Apple distributes the app itself for free — once approved, the `.ipa` lives on
 ## 5. Credit economy
 
 v1.0 ships **free** — no purchases of any kind. The credit system is
-fully self-sustaining via the daily drop, the welcome bonus, personal-
-best bonuses, and promo codes. No payment surface exists in the v1.0
-build, no products are configured in App Store Connect, no tax forms
-are required.
+fully self-sustaining via the daily drop, the welcome bonus, the daily-
+challenge free play, and personal-best / leaderboard bonuses. No
+payment surface exists, no non-IAP unlock mechanisms exist (per Apple
+3.1.1 — promo redemption was pulled in v1.0.1 and will return as
+Apple Offer Codes in v1.1 alongside real IAPs), no products are
+configured in App Store Connect, no tax forms are required.
 
-- [x] AsyncStorage persistence for player state (credits, initials, redeemed codes survive app kill)
+- [x] AsyncStorage persistence for player state (credits, initials survive app kill)
 - [x] First-launch initials prompt — new players pick their 3 letters before the lobby
 - [x] 7-day welcome bonus — 100 credits/day for first week, 50/day after
 - [x] Personal-best credit rewards — +5 PB, +20 first top-10, +50 first #1
 - [x] Daily challenge cabinet always free
-- [x] Promo code system
 
 ## 6. Leaderboard — Supabase (chosen)
 
@@ -137,7 +138,6 @@ Code wiring is **complete**. Falls back to mock data until you plug in real cred
 - [ ] Test EXIT chip works on every play screen
 - [ ] Test long Slipstream/Pulse runs for memory leaks (>5 min)
 - [ ] Test offline behavior — confirm nothing requires network in v1
-- [ ] Test promo code redemption (try all 12 codes, verify one-time-use)
 
 ## 11. Pre-submission checklist (Apple's common rejection causes)
 
